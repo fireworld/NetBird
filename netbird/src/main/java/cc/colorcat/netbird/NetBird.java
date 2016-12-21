@@ -91,6 +91,10 @@ public final class NetBird {
         sender.cancel(tag);
     }
 
+    public void cancelAll() {
+        sender.cancelAll();
+    }
+
     private static class Task<T> implements Runnable {
         private final NetBird bird;
         private final Request<T> req;
