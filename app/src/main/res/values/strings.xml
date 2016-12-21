@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">NetBirdDemo</string>
+    <string name="thumbnail">thumbnail</string>
+    <string name="title">title</string>
+    <string name="content">content</string>
+    <string name="show_list_view">Show List View</string>
+    <string name="download_firefox">Download Firefox</string>
+    <string name="image_view">image view</string>
+    <string name="cancel_download_firefox">Cancel Download Firefox</string>
+    <string name="do_get">Do Get</string>
+    <string name="do_post">Do Post</string>
+    <string name="test">test</string>
+</resources>
