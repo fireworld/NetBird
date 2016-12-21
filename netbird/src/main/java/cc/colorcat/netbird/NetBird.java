@@ -1,6 +1,5 @@
 package cc.colorcat.netbird;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -8,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +18,6 @@ import cc.colorcat.netbird.response.ResponseBody;
 import cc.colorcat.netbird.sender.Sender;
 import cc.colorcat.netbird.sender.httpsender.HttpSender;
 import cc.colorcat.netbird.util.Const;
-import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
 
 /**
@@ -31,25 +29,26 @@ public final class NetBird {
     private static final Response FAIL_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private static final NetworkData FAIL_DATA = NetworkData.onFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private final Set<Request<?>> runningReqs = new CopyOnWriteArraySet<>();
+    private final List<Processor<Request>> requestProcessors;
+    private final List<Processor<Response>> responseProcessors;
     private final ExecutorService executor;
-    private final Sender sender;
     private final String baseUrl;
-    private List<Processor<Request>> requestProcessors;
-    private List<Processor<Response>> responseProcessors;
+    private final Sender sender;
 
 
     private NetBird(Builder builder) {
-        this.executor = Utils.nullElse(builder.executor, defaultService());
-        this.baseUrl = builder.baseUrl;
-        LogUtils.init(builder.ctx);
         this.requestProcessors = Utils.immutableList(builder.requestProcessors);
         this.responseProcessors = Utils.immutableList(builder.responseProcessors);
+        this.executor = Utils.nullElse(builder.executor, defaultService());
+        this.baseUrl = builder.baseUrl;
         this.sender = new HttpSender(builder.connectTimeOut, builder.readTimeOut);
     }
 
     private static ExecutorService defaultService() {
-        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), Utils.threadFactory("NetBird", false));
+//        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
+//                new SynchronousQueue<Runnable>(), Utils.threadFactory("NetBird", false));
+        return new ThreadPoolExecutor(6, 10, 60L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
     }
 
     public <T> Object sendRequest(@NonNull final Request<T> req) {
@@ -129,16 +128,14 @@ public final class NetBird {
         private List<Processor<Response>> responseProcessors = new ArrayList<>(4);
         private ExecutorService executor;
         private String baseUrl;
-        private Context ctx;
         private int readTimeOut = 3000;
         private int connectTimeOut = 5000;
 
-        public Builder(String baseUrl, Context ctx) {
+        public Builder(String baseUrl) {
             Utils.nonNull(baseUrl, "baseUrl == null");
             if (!baseUrl.toLowerCase().startsWith("http")) {
                 throw new IllegalArgumentException("illegal scheme, the scheme must be http or https");
             }
-            this.ctx = Utils.nonNull(ctx, "ctx == null");
             this.baseUrl = baseUrl;
         }
 
