@@ -75,6 +75,10 @@ public class LogUtils {
         }
     }
 
+    public static void dd(String tag, String msg) {
+        Log.d(tag, msg);
+    }
+
     public static void ii(String tag, String msg) {
         Log.i(tag, msg);
     }

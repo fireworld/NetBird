@@ -79,7 +79,7 @@ public class ApiService {
                     String value = headers.value(i);
                     LogUtils.ii(TAG, "response header --> " + name + " = " + value);
                 }
-                LogUtils.ii(TAG, "----------------------------------------------------------------------------------");
+                LogUtils.ii(TAG, "--------------------------------------------------------------------------------------");
             }
             return response;
         }
@@ -92,28 +92,28 @@ public class ApiService {
         public Request process(@NonNull Request req) {
             if (LogUtils.isDebug) {
                 Method m = req.method();
-                LogUtils.ii(TAG, "-------------------------------------- " + m.name() + " --------------------------------------");
+                LogUtils.ii(TAG, "---------------------------------------- " + m.name() + " -----------------------------------------");
                 String url = url(req);
                 if (m == Method.GET) {
                     String params = req.encodedParams();
                     if (!Utils.isEmpty(params)) {
                         url = url + '?' + params;
                     }
-                    LogUtils.ii(TAG, "req url --> " + url);
+                    LogUtils.dd(TAG, "req url --> " + url);
                 } else {
-                    LogUtils.ii(TAG, "req url --> " + url);
+                    LogUtils.dd(TAG, "req url --> " + url);
                     logPairs(req.paramNames(), req.paramValues(), "parameter");
                     logPacks(req);
                 }
                 logPairs(req.headerNames(), req.headerValues(), "header");
-                LogUtils.ii(TAG, "----------------------------------------------------------------------------------");
+                LogUtils.ii(TAG, "--------------------------------------------------------------------------------------");
             }
             return req;
         }
 
         private static void logPairs(List<String> names, List<String> values, String mark) {
             for (int i = 0, size = names.size(); i < size; i++) {
-                LogUtils.ii(TAG, "req " + mark + " -- > " + names.get(i) + " = " + values.get(i));
+                LogUtils.dd(TAG, "req " + mark + " -- > " + names.get(i) + " = " + values.get(i));
             }
         }
 
@@ -122,7 +122,7 @@ public class ApiService {
             List<Request.Pack> packs = req.packs();
             for (int i = 0, size = packs.size(); i < size; i++) {
                 Request.Pack pack = packs.get(i);
-                LogUtils.ii(TAG, "req pack --> " + pack.name + "--" + pack.contentType + "--" + pack.file.getAbsolutePath());
+                LogUtils.dd(TAG, "req pack --> " + pack.name + "--" + pack.contentType + "--" + pack.file.getAbsolutePath());
             }
         }
 
