@@ -29,8 +29,6 @@ import cc.colorcat.netbird.util.Utils;
  */
 
 public final class HttpSender implements Sender {
-    private static final String TAG = "NetBird";
-
     private Map<Object, HttpURLConnection> running = new ConcurrentHashMap<>();
     private int connectTimeOut = 5000;
     private int readTimeOut = 3000;
@@ -117,42 +115,6 @@ public final class HttpSender implements Sender {
         conn.setRequestProperty("Connection", "Keep-Alive");
         return conn;
     }
-
-    private static void log(String baseUrl, Request<?> req, int code, String msg) {
-        if (LogUtils.isDebug) {
-            LogUtils.ii(TAG, "-------------------------------------- " + req.method().name() + " --------------------------------------");
-            LogUtils.ii(TAG, "Url --> " + url(baseUrl, req));
-
-            if (Method.POST == req.method()) {
-                List<String> names = req.paramNames();
-                List<String> values = req.paramValues();
-                for (int i = 0, size = names.size(); i < size; i++) {
-                    LogUtils.ii(TAG, "Parameter --> " + names.get(i) + " = " + values.get(i));
-                }
-
-                List<Request.Pack> packs = req.packs();
-                if (packs != null) {
-                    for (int i = 0, size = packs.size(); i < size; i++) {
-                        Request.Pack park = packs.get(i);
-                        LogUtils.ii(TAG, "File FieldName --> " + park.name);
-                        LogUtils.ii(TAG, "File ContentType --> " + park.contentType);
-                        LogUtils.ii(TAG, "File Path --> " + park.file.getAbsolutePath());
-                    }
-                }
-            }
-
-//            Headers headers = req.headers();
-//            if (headers != null) {
-//                for (int i = 0, size = headers.size(); i < size; i++) {
-//                    String name = headers.name(i);
-//                    LogUtils.ii(TAG, "Headers --> " + name + " = " + headers.values(name));
-//                }
-//            }
-            LogUtils.ii(TAG, "Response --> code = " + code + ", msg = " + msg);
-            LogUtils.ii(TAG, "----------------------------------------------------------------------------------");
-        }
-    }
-
 
     private static String url(String baseUrl, Request<?> req) {
         String url = Utils.emptyElse(req.url(), baseUrl);
