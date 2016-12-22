@@ -22,7 +22,7 @@ import cc.colorcat.netbird.response.Response;
  */
 public class MainActivity extends Activity {
     // 请求网址:http://www.imooc.com/api/teacher?type=4&num=30
-    public static final String HOST = "http://www.imooc.com/api/";
+    public static final String HOST = "http://www.imooc.com/api";
 
     private List<Course> mList = new ArrayList<>();
     private BaseAdapter mAdapter;
@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         };
         final Request request = new Request.Builder<>(new GsonParser<>(token))
                 .url(HOST)
-                .path("teacher")
+                .path("/teacher")
                 .method(Method.GET)
                 .add("type", 4)
                 .add("num", 30)

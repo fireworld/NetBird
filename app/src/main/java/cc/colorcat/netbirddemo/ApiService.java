@@ -25,7 +25,7 @@ public class ApiService {
     public static final String TAG = "ApiService";
 
     private static NetBird bird;
-    private static final String baseUrl = "https://www.zzb18.com/zzbh5";
+    private static final String baseUrl = "http://www.imooc.com/api";
 
     static {
         bird = new NetBird.Builder(baseUrl)
