@@ -397,11 +397,24 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        public Builder<T> clear() {
+            paramNames.clear();
+            paramValues.clear();
+            return this;
+        }
+
         public Builder<T> addFile(String name, String mediaType, File file) {
             if (packs == null) {
                 packs = new ArrayList<>();
             }
             packs.add(Pack.create(name, mediaType, file));
+            return this;
+        }
+
+        public Builder<T> clearFiles() {
+            if (packs != null) {
+                packs.clear();
+            }
             return this;
         }
 
@@ -416,6 +429,14 @@ public final class Request<T> implements Comparable<Request> {
             Utils.checkHeader(name, value);
             removeHeader(name);
             realAddHeader(name, value);
+            return this;
+        }
+
+        public Builder<T> clearHeaders() {
+            if (headerNames != null) {
+                headerNames.clear();
+                headerValues.clear();
+            }
             return this;
         }
 
