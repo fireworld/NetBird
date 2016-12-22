@@ -174,38 +174,6 @@ public final class Request<T> implements Comparable<Request> {
         }
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (!(o instanceof Request)) return false;
-//
-//        Request<?> request = (Request<?>) o;
-//
-//        if (!Utils.equal(url, request.url)) return false;
-//        if (!Utils.equal(path, request.path)) return false;
-//        if (method != request.method) return false;
-//        if (!Utils.equalList(paramNames, request.paramNames)) return false;
-//        if (!Utils.equalList(paramValues, request.paramValues)) return false;
-//        if (!Utils.equalList(headerNames, request.headerNames)) return false;
-//        if (!Utils.equalList(headerValues, request.headerValues)) return false;
-//        return Utils.equalList(packs, request.packs);
-//    }
-//
-//
-//    @Override
-//    public int hashCode() {
-//        int result = (url != null ? url.hashCode() : 0);
-//        result = 31 * result + (path != null ? path.hashCode() : 0);
-//        result = 31 * result + method.hashCode();
-//        result = 31 * result + paramNames.hashCode();
-//        result = 31 * result + paramValues.hashCode();
-//        result = 31 * result + (headerNames != null ? headerNames.hashCode() : 0);
-//        result = 31 * result + (headerValues != null ? headerValues.hashCode() : 0);
-//        result = 31 * result + (packs != null ? packs.hashCode() : 0);
-//        return result;
-//    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
