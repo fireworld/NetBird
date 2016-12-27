@@ -191,7 +191,6 @@ public final class Request<T> implements Comparable<Request> {
         if (headerValues != null ? !headerValues.equals(request.headerValues) : request.headerValues != null)
             return false;
         return packs != null ? packs.equals(request.packs) : request.packs == null;
-
     }
 
     @Override
@@ -365,6 +364,14 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        public List<String> names() {
+            return Collections.unmodifiableList(paramNames);
+        }
+
+        public List<String> values() {
+            return Collections.unmodifiableList(paramValues);
+        }
+
         public Builder<T> clear() {
             paramNames.clear();
             paramValues.clear();
@@ -398,6 +405,14 @@ public final class Request<T> implements Comparable<Request> {
             removeHeader(name);
             realAddHeader(name, value);
             return this;
+        }
+
+        public List<String> headerNames() {
+            return headerNames != null ? Collections.unmodifiableList(headerNames) : Collections.<String>emptyList();
+        }
+
+        public List<String> headerValues() {
+            return headerValues != null ? Collections.unmodifiableList(headerValues) : Collections.<String>emptyList();
         }
 
         public Builder<T> clearHeaders() {
