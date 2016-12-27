@@ -191,7 +191,6 @@ public final class Request<T> implements Comparable<Request> {
         if (headerValues != null ? !headerValues.equals(request.headerValues) : request.headerValues != null)
             return false;
         return packs != null ? packs.equals(request.packs) : request.packs == null;
-
     }
 
     @Override
