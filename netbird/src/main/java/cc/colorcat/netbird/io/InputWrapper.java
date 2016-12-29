@@ -64,9 +64,7 @@ public class InputWrapper extends InputStream {
     private InputWrapper(@NonNull InputStream is, long contentLength, ProgressListener listener) {
         this.delegate = Utils.nonNull(is, "is == null");
         this.contentLength = contentLength;
-        if (this.contentLength > 0) {
-            this.listener = listener;
-        }
+        this.listener = listener;
     }
 
     @Override
