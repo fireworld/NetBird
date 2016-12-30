@@ -19,6 +19,11 @@ import cc.colorcat.netbird.util.Utils;
 public class FileParser implements Parser<File> {
     private File file;
 
+    public static FileParser create(String savePath) {
+        File file = new File(Utils.nonEmpty(savePath, "savePath is empty"));
+        return create(file);
+    }
+
     public static FileParser create(File file) {
         Utils.nonNull(file, "file == null");
         File parent = file.getParentFile();
