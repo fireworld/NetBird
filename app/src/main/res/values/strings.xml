@@ -10,4 +10,6 @@
     <string name="do_get">Do Get</string>
     <string name="do_post">Do Post</string>
     <string name="test">test</string>
+    <string name="download_test">Download Test</string>
+    <string name="test_proxy">Test Proxy</string>
 </resources>

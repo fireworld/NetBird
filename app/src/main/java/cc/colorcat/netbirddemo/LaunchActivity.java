@@ -4,12 +4,14 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.net.Proxy;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -28,6 +30,7 @@ import cc.colorcat.netbird.util.LogUtils;
  * xx.ch@outlook.com
  */
 public class LaunchActivity extends AppCompatActivity {
+    public static final String DOWNLOAD_TEST = "https://70.miiditest.com/aw/mac.woa?param=Ku3%2BTEeywSRzwzqMa5yfBGvVcaNcEHh66B%2Be%2B1PXMvYxE7v7EhGWnYMwHep%2B2%2BkqbHxvxZgcIIb3c4%2FBfdAcYZHgGp1E%2BQ3ejSReVRf8D%2BK9H8%2FyYnDpnh7rT5rR2iyOGI%2B0sceGJS2IfDJ86B5vRF6bkx8hH9DRzXx%2B0lfTO9zI0VLU7EiUc1XAfM1zwQlpA8Df4u2i57o861c%2FSZ6jPFrPJtIyeng6vKPpTFzDkV8%2F6ae1Ee78T1MpjkZ2WlrOmP35bCpeiyQmkAP6HkcP1W9agPc0hvSFVj18AWtb0ml%2F90qDrT%2FAOjR2Ad0KvXNPq4U4yTLKI16pqXsqaxqDVFcxzThTxYnbtCOTjOOSiUDiCyN4LfgQnf%2Foog0QooWvqxKdDZ749fqJi%2BPBuk7A3%2BUwxZQIUnyxgR7NC%2B4a8cY%2FRy2dVhTLmtmkaOyiIdhidUrZGaYKWpLKDVJc6jBuC8q9qLuWHvKrHrhNO5u7q4Arxp%2FfZrqaqW0yp3sAk0TOTr5f0r9pGea7x6vBhXnbTOOO921vZsQ2yMFGI73ZEAdUw6mXRqmb1XJ7nX8tbiwRigygzQ505DMCVGqVpL7xj9ygI2FecCfaE%2FYkWcZt4MiSdJ7r384ca2qbstVdIkhCpRrZbHXRApQeaeDKJWA0Xd4jgUsdhb%2BTPLxZY5KvBakPnaxI3j4quF5XGF8WQ1nr";
     public static final File userHeardImg = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "1478852074829.png");
     public static final String FIREFOX = "http://download.firefox.com.cn/releases/mobile/45.0/zh-CN/Firefox-Android-45.0.apk";
 
@@ -54,6 +57,8 @@ public class LaunchActivity extends AppCompatActivity {
         findViewById(R.id.btn_get).setOnClickListener(mClick);
         findViewById(R.id.btn_post).setOnClickListener(mClick);
         findViewById(R.id.btn_test).setOnClickListener(mClick);
+        findViewById(R.id.btn_download_test).setOnClickListener(mClick);
+        findViewById(R.id.btn_test_proxy).setOnClickListener(mClick);
 
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (result != PackageManager.PERMISSION_GRANTED) {
@@ -67,6 +72,9 @@ public class LaunchActivity extends AppCompatActivity {
             switch (v.getId()) {
                 case R.id.btn_jump:
                     startActivity(new Intent(LaunchActivity.this, MainActivity.class));
+                    break;
+                case R.id.btn_download_test:
+                    downloadTest();
                     break;
                 case R.id.btn_download:
                     download();
@@ -89,11 +97,47 @@ public class LaunchActivity extends AppCompatActivity {
                             .build();
                     ApiService.call(req);
                     break;
+                case R.id.btn_test_proxy:
+                    testProxy();
+                    break;
                 default:
                     break;
             }
         }
     };
+
+    private void testProxy() {
+        String hostS = Proxy.getDefaultHost();
+        int portS = Proxy.getDefaultPort();
+        String host = Proxy.getHost(this);
+        int port = Proxy.getPort(this);
+        Log.d("LaunchActivity", hostS + " : " + portS + "\n" + host + " : " + port);
+    }
+
+    private void downloadTest() {
+        File path = new File(getExternalCacheDir(), "test.apk");
+        Request<File> req = new Request.Builder<>(FileParser.create(path))
+                .url(DOWNLOAD_TEST)
+                .method(Method.GET)
+                .loadListener(new Response.LoadListener() {
+                    @Override
+                    public void onChanged(long read, long total, int percent) {
+                        LogUtils.e("Progress", read + " : " + total + " : " + percent);
+                    }
+                })
+                .callback(new Response.SimpleCallback<File>() {
+                    @Override
+                    public void onSuccess(@NonNull File result) {
+                        showToast(result.getAbsolutePath());
+                    }
+
+                    @Override
+                    public void onFailure(int code, @NonNull String msg) {
+                        showToast(code + " : " + msg);
+                    }
+                }).build();
+        ApiService.call(req);
+    }
 
     private void doGet() {
         showToast("to doGet");
