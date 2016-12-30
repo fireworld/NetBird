@@ -29,13 +29,13 @@ public class ApiService {
 
     static {
         bird = new NetBird.Builder(baseUrl)
-                .addRequestProcessor(new Processor<Request>() {
-                    @NonNull
-                    @Override
-                    public Request process(@NonNull Request request) {
-                        return request.newBuilder().add("test1", "value1").add("test2", "value2").build();
-                    }
-                })
+//                .addRequestProcessor(new Processor<Request>() {
+//                    @NonNull
+//                    @Override
+//                    public Request process(@NonNull Request request) {
+//                        return request.newBuilder().add("test1", "value1").add("test2", "value2").build();
+//                    }
+//                })
                 .addRequestProcessor(new LogReqProcessor())
                 .addResponseProcessor(new LogRepProcessor())
                 .build();
