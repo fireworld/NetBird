@@ -129,11 +129,12 @@ public class LaunchActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(@NonNull File result) {
                         showToast(result.getAbsolutePath());
+                        LogUtils.e("Progress", result.getAbsolutePath());
                     }
 
                     @Override
                     public void onFailure(int code, @NonNull String msg) {
-                        showToast(code + " : " + msg);
+                        LogUtils.e("Progress", code + " : " + msg);
                     }
                 }).build();
         ApiService.call(req);
