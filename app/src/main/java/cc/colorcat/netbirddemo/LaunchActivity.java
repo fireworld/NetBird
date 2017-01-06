@@ -142,7 +142,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     private void doGet() {
         showToast("to doGet");
-        Request<String> req = new Request.Builder<>(StringParser.getDefault())
+        Request<String> req = new Request.Builder<>(StringParser.getUtf8())
                 .callback(new Response.SimpleCallback<String>() {
                     @Override
                     public void onSuccess(@NonNull String result) {
@@ -160,7 +160,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     private void doPost() {
         showToast("to doPost");
-        Request<String> req = new Request.Builder<>(StringParser.getDefault())
+        Request<String> req = new Request.Builder<>(StringParser.getUtf8())
                 .callback(new Response.SimpleCallback<String>() {
                     @Override
                     public void onSuccess(@NonNull String result) {
@@ -179,7 +179,7 @@ public class LaunchActivity extends AppCompatActivity {
     }
 
     private void uploadImage() {
-        Request<String> req = new Request.Builder<>(StringParser.getDefault())
+        Request<String> req = new Request.Builder<>(StringParser.getUtf8())
                 .callback(new Response.SimpleCallback<String>() {
                     @Override
                     public void onSuccess(@NonNull String result) {
