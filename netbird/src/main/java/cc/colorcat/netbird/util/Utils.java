@@ -70,6 +70,13 @@ public class Utils {
         }
     }
 
+    public static String checkedHttp(String url) {
+        if (!url.startsWith("http")) {
+            throw new IllegalArgumentException("Bad url, the scheme must be http or https");
+        }
+        return url;
+    }
+
     public static void checkHeader(String name, String value) {
         if (name == null) throw new NullPointerException("name == null");
         if (name.isEmpty()) throw new IllegalArgumentException("name is empty");

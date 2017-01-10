@@ -19,6 +19,7 @@ import cc.colorcat.netbird.util.Utils;
  * Created by cxx on 16/2/28.
  * xx.ch@outlook.com
  */
+@SuppressWarnings("unused")
 public final class Request<T> implements Comparable<Request> {
     private List<String> paramNames;
     private List<String> paramValues;
@@ -308,11 +309,17 @@ public final class Request<T> implements Comparable<Request> {
             this.parser = Utils.nonNull(parser, "parser == null");
         }
 
+        /**
+         * @param url 请求的 http/https 地址，如果没有设置则使用构建 NetBird 时的 baseUrl
+         */
         public Builder<T> url(String url) {
-            this.url = url;
+            this.url = Utils.checkedHttp(url);
             return this;
         }
 
+        /**
+         * @param path 请求的路径
+         */
         public Builder<T> path(String path) {
             this.path = path;
             return this;
@@ -323,61 +330,131 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * @param callback 请求结果的回调，{@link cc.colorcat.netbird.response.Response.Callback} 中的方法均在主线程执行
+         */
         public Builder<T> callback(Response.Callback<? super T> callback) {
             this.callback = callback;
             return this;
         }
 
+        /**
+         * @param listener 下载进度监听器，服务器必须返回数据的长度才有效 {@link Response#contentLength()}
+         */
         public Builder<T> loadListener(Response.LoadListener listener) {
             this.loadListener = listener;
             return this;
         }
 
+        /**
+         * @param listener 上传进度监听器
+         */
         public Builder<T> uploadListener(UploadListener listener) {
             this.uploadListener = listener;
             return this;
         }
 
+        /**
+         * 添加请求参数
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         */
         public Builder<T> add(String name, String value) {
             paramNames.add(Utils.nonEmpty(name, "name is empty"));
             paramValues.add(Utils.nonEmpty(value, "paramValues is empty"));
             return this;
         }
 
+        /**
+         * 添加请求参数
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         */
         public Builder<T> add(String name, int value) {
             add(name, String.valueOf(value));
             return this;
         }
 
+        /**
+         * 添加请求参数
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         */
         public Builder<T> add(String name, long value) {
             add(name, String.valueOf(value));
             return this;
         }
 
+        /**
+         * 添加请求参数
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         */
         public Builder<T> add(String name, float value) {
             add(name, String.valueOf(value));
             return this;
         }
 
+        /**
+         * 添加请求参数
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         */
         public Builder<T> add(String name, double value) {
             add(name, String.valueOf(value));
             return this;
         }
 
+        /**
+         * 除清指定名称的参数
+         *
+         * @param name 需要清除的参数的名称
+         */
+        public Builder<T> remove(String name) {
+            for (int i = paramNames.size() - 1; i >= 0; i--) {
+                if (paramNames.get(i).equals(name)) {
+                    paramNames.remove(i);
+                    paramValues.remove(i);
+                }
+            }
+            return this;
+        }
+
+        /**
+         * @return 返回所有请求参数的名称，不可修改，顺序与 {@link Builder#values()} 一一对应。
+         */
         public List<String> names() {
             return Collections.unmodifiableList(paramNames);
         }
 
+        /**
+         * @return 返回所有请求参数的值，不可修改，顺序与 {@link Builder#names()} 一一对应。
+         */
         public List<String> values() {
             return Collections.unmodifiableList(paramValues);
         }
 
+        /**
+         * 清除所有已添加的请求参数
+         */
         public Builder<T> clear() {
             paramNames.clear();
             paramValues.clear();
             return this;
         }
 
+        /**
+         * 添加需要上传的文件
+         *
+         * @param name      参数名
+         * @param mediaType 文件类型，如 image/png
+         * @param file      文件全路径
+         */
         public Builder<T> addFile(String name, String mediaType, File file) {
             if (packs == null) {
                 packs = new ArrayList<>();
@@ -386,6 +463,9 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * 清除所有已添加并准备上传的文件——仅是不上传，并非从磁盘删除
+         */
         public Builder<T> clearFiles() {
             if (packs != null) {
                 packs.clear();
@@ -393,13 +473,24 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
-
+        /**
+         * 添加一个请求 Header 参数，如果已添加了名称相同的 Header 不会清除之前的。
+         *
+         * @param name  Header 的名称
+         * @param value Header 的值
+         */
         public Builder<T> addHeader(String name, String value) {
             Utils.checkHeader(name, value);
             realAddHeader(name, value);
             return this;
         }
 
+        /**
+         * 设置一个请求 Header 参数，如果已添加了名称相同的 Header 则原来的会被清除。
+         *
+         * @param name  Header 的名称
+         * @param value Header 的值
+         */
         public Builder<T> setHeader(String name, String value) {
             Utils.checkHeader(name, value);
             removeHeader(name);
@@ -407,14 +498,23 @@ public final class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * @return 返回所有已添加的 Header 的名称，顺序与 {@link Builder#headerValues()} 一一对应
+         */
         public List<String> headerNames() {
             return headerNames != null ? Collections.unmodifiableList(headerNames) : Collections.<String>emptyList();
         }
 
+        /**
+         * @return 返回所有已添加的 Header 的值，顺序与 {@link Builder#headerNames()} 一一对应
+         */
         public List<String> headerValues() {
             return headerValues != null ? Collections.unmodifiableList(headerValues) : Collections.<String>emptyList();
         }
 
+        /**
+         * 清除所有已添加的 Header 参数
+         */
         public Builder<T> clearHeaders() {
             if (headerNames != null) {
                 headerNames.clear();
