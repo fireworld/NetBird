@@ -136,7 +136,7 @@ public final class NetBird {
         private int connectTimeOut = 5000;
 
         /**
-         * @param baseUrl http/https，如果 {@link Request}, {@link Request.Builder#url()} 中没有设置 url 则会以此代替
+         * @param baseUrl http/https，如果 {@link Request.Builder#url(String)} 未设置 url 则会以此代替
          */
         public Builder(String baseUrl) {
             this.baseUrl = Utils.checkedHttp(baseUrl);
@@ -151,16 +151,21 @@ public final class NetBird {
         }
 
         /**
-         * 添加一个 {@link Request} 处理器，用于对 {@link Request} 的再次处理
-         * 在将 Request 发出前会依次调用以对原始的 {@link Request} 进行处理，如可借此打印请求日志等
-         * Note: 处理会按照添加的顺序进行，请勿在处理器中修改原 Request 中与类型相关的参数，如:
-         * {@link cc.colorcat.netbird.parser.Parser}, {@link cc.colorcat.netbird.response.Response.Callback}
+         * 添加 {@link Processor<Request>}，用于处理 {@link Request}
+         * 在将 Request 发出前会依次调用添加的 {@link Processor<Request>} 处理原始的 {@link Request}，可借此打印请求日志等。
+         * <p>
+         * Note: 调用会依添加的顺序进行，请谨慎修改 {@link Request} 中涉及泛型的数据，否则可能导致数据解析或回调错误，如：
+         * {@link cc.colorcat.netbird.parser.Parser}, {@link Response.Callback}
          */
         public Builder addRequestProcessor(Processor<Request> reqProcessor) {
             requestProcessors.add(Utils.nonNull(reqProcessor, "reqProcessor == null"));
             return this;
         }
 
+        /**
+         * 添加 {@link Processor<Response>}, 用于处理 {@link Response}
+         * 在将返回的 Response 进行解析前会依次调用添加的 {@link Processor<Response>} 处理原始的 {@link Response}，可借此打印响应日志等。
+         */
         public Builder addResponseProcessor(Processor<Response> repProcessor) {
             responseProcessors.add(repProcessor);
             return this;
