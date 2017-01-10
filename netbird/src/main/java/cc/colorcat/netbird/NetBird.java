@@ -165,6 +165,8 @@ public final class NetBird {
         /**
          * 添加 {@link Processor<Response>}, 用于处理 {@link Response}
          * 在将返回的 Response 进行解析前会依次调用添加的 {@link Processor<Response>} 处理原始的 {@link Response}，可借此打印响应日志等。
+         * <p>
+         * Note: 调用会依添加的顺序进行，请谨慎调用 {@link Response#body()}, {@link ResponseBody} 可能只能读取一次。
          */
         public Builder addResponseProcessor(Processor<Response> repProcessor) {
             responseProcessors.add(repProcessor);
