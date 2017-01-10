@@ -135,21 +135,29 @@ public final class NetBird {
         private int readTimeOut = 3000;
         private int connectTimeOut = 5000;
 
+        /**
+         * @param baseUrl http/https，如果 {@link Request}, {@link Request.Builder#url()} 中没有设置 url 则会以此代替
+         */
         public Builder(String baseUrl) {
-            Utils.nonNull(baseUrl, "baseUrl == null");
-            if (!baseUrl.toLowerCase().startsWith("http")) {
-                throw new IllegalArgumentException("illegal scheme, the scheme must be http or https");
-            }
-            this.baseUrl = baseUrl;
+            this.baseUrl = Utils.checkedHttp(baseUrl);
         }
 
+        /**
+         * 配置请求线程池，非必须，一般无须设置采用默认即可
+         */
         public Builder executor(ExecutorService executor) {
-            this.executor = executor;
+            this.executor = Utils.nonNull(executor, "executor == null");
             return this;
         }
 
+        /**
+         * 添加一个 {@link Request} 处理器，用于对 {@link Request} 的再次处理
+         * 在将 Request 发出前会依次调用以对原始的 {@link Request} 进行处理，如可借此打印请求日志等
+         * Note: 处理会按照添加的顺序进行，请勿在处理器中修改原 Request 中与类型相关的参数，如:
+         * {@link cc.colorcat.netbird.parser.Parser}, {@link cc.colorcat.netbird.response.Response.Callback}
+         */
         public Builder addRequestProcessor(Processor<Request> reqProcessor) {
-            requestProcessors.add(reqProcessor);
+            requestProcessors.add(Utils.nonNull(reqProcessor, "reqProcessor == null"));
             return this;
         }
 
