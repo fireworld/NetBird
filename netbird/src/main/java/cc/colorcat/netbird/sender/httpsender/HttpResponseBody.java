@@ -22,11 +22,11 @@ final class HttpResponseBody extends ResponseBody {
     @Nullable
     private String charset;
 
-    static HttpResponseBody create(@NonNull InputStream is, String charset) {
+    static HttpResponseBody create(@NonNull InputStream is, @Nullable String charset) {
         return new HttpResponseBody(is, charset);
     }
 
-    private HttpResponseBody(InputStream is, @Nullable String charset) {
+    private HttpResponseBody(@NonNull InputStream is, @Nullable String charset) {
         super(is);
         this.charset = charset;
     }

@@ -43,9 +43,9 @@ public class FileParser implements Parser<File> {
         try {
             FileOutputStream fos = new FileOutputStream(file);
             IoUtils.dumpAndClose(data.body().stream(), fos);
-            return NetworkData.onSuccess(file);
+            return NetworkData.newSuccess(file);
         } catch (IOException e) {
-            return NetworkData.onFailure(data.code(), Utils.formatMsg(data.msg(), e));
+            return NetworkData.newFailure(data.code(), Utils.formatMsg(data.msg(), e));
         }
     }
 }

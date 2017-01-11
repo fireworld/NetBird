@@ -40,9 +40,9 @@ public class GsonParser<T> implements Parser<T> {
         try {
             reader = data.body().reader();
             T t = GSON.fromJson(reader, token.getType());
-            return NetworkData.onSuccess(t);
+            return NetworkData.newSuccess(t);
         } catch (JsonParseException e) {
-            return NetworkData.onFailure(data.code(), Utils.formatMsg(data.msg(), e));
+            return NetworkData.newFailure(data.code(), Utils.formatMsg(data.msg(), e));
         } finally {
             IoUtils.close(reader);
         }

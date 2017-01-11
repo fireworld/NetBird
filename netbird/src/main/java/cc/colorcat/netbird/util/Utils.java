@@ -28,7 +28,6 @@ import cc.colorcat.netbird.response.Response;
  * Created by cxx on 16-12-13.
  * xx.ch@outlook.com
  */
-
 public class Utils {
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 

@@ -20,7 +20,7 @@ import cc.colorcat.netbird.util.Utils;
  * xx.ch@outlook.com
  */
 @SuppressWarnings("unused")
-public final class Request<T> implements Comparable<Request> {
+public class Request<T> implements Comparable<Request> {
     private List<String> paramNames;
     private List<String> paramValues;
     private List<String> headerNames;
@@ -35,7 +35,7 @@ public final class Request<T> implements Comparable<Request> {
     private Response.LoadListener loadListener;
     private UploadListener uploadListener;
 
-    private Request(Builder<T> builder) {
+    protected Request(Builder<T> builder) {
         this.paramNames = builder.paramNames;
         this.paramValues = builder.paramValues;
         this.headerNames = builder.headerNames;
@@ -290,7 +290,7 @@ public final class Request<T> implements Comparable<Request> {
         private Response.LoadListener loadListener;
         private UploadListener uploadListener;
 
-        private Builder(Request<T> req) {
+        protected Builder(Request<T> req) {
             this.paramNames = req.paramNames;
             this.paramValues = req.paramValues;
             this.headerNames = req.headerNames;
@@ -305,10 +305,24 @@ public final class Request<T> implements Comparable<Request> {
             this.uploadListener = req.uploadListener;
         }
 
+        /**
+         * @param parser 数据解析，将 {@link Response} 解析为目标数据
+         * @see cc.colorcat.netbird.parser.BitmapParser
+         * @see cc.colorcat.netbird.parser.FileParser
+         * @see cc.colorcat.netbird.parser.JsonParser
+         * @see cc.colorcat.netbird.parser.StringParser
+         */
         public Builder(@NonNull Parser<? extends T> parser) {
             this.parser = Utils.nonNull(parser, "parser == null");
         }
 
+        /**
+         * @param parser 数据解析，将 {@link Response} 解析为目标数据
+         * @see cc.colorcat.netbird.parser.BitmapParser
+         * @see cc.colorcat.netbird.parser.FileParser
+         * @see cc.colorcat.netbird.parser.JsonParser
+         * @see cc.colorcat.netbird.parser.StringParser
+         */
         public Builder<T> parser(@NonNull Parser<? extends T> parser) {
             this.parser = Utils.nonNull(parser, "parser == null");
             return this;

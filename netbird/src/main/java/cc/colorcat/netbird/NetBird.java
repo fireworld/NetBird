@@ -24,10 +24,9 @@ import cc.colorcat.netbird.util.Utils;
  * Created by cxx on 2016/12/12.
  * xx.ch@outlook.com
  */
-
 public final class NetBird {
     private static final Response FAIL_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
-    private static final NetworkData FAIL_DATA = NetworkData.onFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
+    private static final NetworkData FAIL_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private final Set<Request<?>> runningReqs = new CopyOnWriteArraySet<>();
     private final List<Processor<Request>> requestProcessors;
     private final List<Processor<Response>> responseProcessors;
@@ -117,7 +116,7 @@ public final class NetBird {
                 if (body != null && body.stream() != null) {
                     data = req.parse(response);
                 } else {
-                    data = NetworkData.onFailure(response.code(), response.msg());
+                    data = NetworkData.newFailure(response.code(), response.msg());
                 }
                 req.deliver(data);
             } finally {
