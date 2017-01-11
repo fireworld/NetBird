@@ -44,9 +44,9 @@ public class JsonParser implements Parser<JSONObject> {
             String charset = data.charset(this.charset);
             String value = IoUtils.readAndClose(data.body().stream(), charset);
             JSONObject obj = new JSONObject(value);
-            return NetworkData.onSuccess(obj);
+            return NetworkData.newSuccess(obj);
         } catch (IOException | JSONException e) {
-            return NetworkData.onFailure(data.code(), Utils.formatMsg(data.msg(), e));
+            return NetworkData.newFailure(data.code(), Utils.formatMsg(data.msg(), e));
         }
     }
 }

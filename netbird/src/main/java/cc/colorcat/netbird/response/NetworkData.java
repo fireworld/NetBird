@@ -12,11 +12,11 @@ public class NetworkData<T> {
     public final String msg;
     public final T data;
 
-    public static <R> NetworkData<? extends R> onSuccess(R data) {
+    public static <R> NetworkData<? extends R> newSuccess(R data) {
         return new NetworkData<>(200, "ok", Utils.nonNull(data, "data == null"));
     }
 
-    public static <R> NetworkData<? extends R> onFailure(int code, String msg) {
+    public static <R> NetworkData<? extends R> newFailure(int code, String msg) {
         return new NetworkData<>(code, Utils.nonEmpty(msg, "msg is empty"), null);
     }
 

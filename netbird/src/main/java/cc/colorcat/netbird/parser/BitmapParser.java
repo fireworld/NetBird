@@ -31,9 +31,9 @@ public class BitmapParser implements Parser<Bitmap> {
     public NetworkData<? extends Bitmap> parse(@NonNull Response data) {
         Bitmap bitmap = BitmapFactory.decodeStream(data.body().stream());
         if (bitmap != null) {
-            return NetworkData.onSuccess(bitmap);
+            return NetworkData.newSuccess(bitmap);
         } else {
-            return NetworkData.onFailure(data.code(), data.msg());
+            return NetworkData.newFailure(data.code(), data.msg());
         }
     }
 }

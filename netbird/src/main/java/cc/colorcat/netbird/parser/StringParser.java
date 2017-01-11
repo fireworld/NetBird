@@ -40,9 +40,9 @@ public class StringParser implements Parser<String> {
         try {
             String charset = data.charset(this.charset);
             String value = IoUtils.readAndClose(data.body().stream(), charset);
-            return NetworkData.onSuccess(value);
+            return NetworkData.newSuccess(value);
         } catch (IOException e) {
-            return NetworkData.onFailure(data.code(), Utils.formatMsg(data.msg(), e));
+            return NetworkData.newFailure(data.code(), Utils.formatMsg(data.msg(), e));
         }
     }
 }
