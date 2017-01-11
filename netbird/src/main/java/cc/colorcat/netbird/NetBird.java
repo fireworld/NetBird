@@ -24,7 +24,6 @@ import cc.colorcat.netbird.util.Utils;
  * Created by cxx on 2016/12/12.
  * xx.ch@outlook.com
  */
-
 public final class NetBird {
     private static final Response FAIL_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private static final NetworkData FAIL_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
