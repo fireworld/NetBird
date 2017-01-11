@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,10 +60,10 @@ public final class HttpSender implements Sender {
             LogUtils.e(e);
             msg = Utils.emptyElse(e.getMessage(), Utils.formatMsg(msg, e));
         }
-        if (map == null) {
-            map = Collections.emptyMap();
+        Headers headers = Headers.EMPTY;
+        if (map != null) {
+            headers = Headers.create(map);
         }
-        Headers headers = Headers.create(map);
         return HttpResponse.create(headers, is, code, msg, req.loadListener());
     }
 

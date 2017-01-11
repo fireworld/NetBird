@@ -309,6 +309,11 @@ public final class Request<T> implements Comparable<Request> {
             this.parser = Utils.nonNull(parser, "parser == null");
         }
 
+        public Builder<T> parser(@NonNull Parser<? extends T> parser) {
+            this.parser = Utils.nonNull(parser, "parser == null");
+            return this;
+        }
+
         /**
          * @param url 请求的 http/https 地址，如果没有设置则使用构建 NetBird 时的 baseUrl
          */
