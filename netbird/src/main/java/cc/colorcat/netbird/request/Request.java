@@ -20,7 +20,7 @@ import cc.colorcat.netbird.util.Utils;
  * xx.ch@outlook.com
  */
 @SuppressWarnings("unused")
-public final class Request<T> implements Comparable<Request> {
+public class Request<T> implements Comparable<Request> {
     private List<String> paramNames;
     private List<String> paramValues;
     private List<String> headerNames;
