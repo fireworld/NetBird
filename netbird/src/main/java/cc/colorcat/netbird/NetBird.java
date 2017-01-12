@@ -51,6 +51,7 @@ public final class NetBird {
     }
 
     public <T> Object sendRequest(@NonNull Request<T> req) {
+        Utils.nonNull(req, "req == null");
         final Object tag = System.currentTimeMillis();
         Request<T> request = processRequest(req);
         if (runningReqs.add(request)) {
@@ -78,8 +79,8 @@ public final class NetBird {
         return request;
     }
 
-    private Response processResponse(final Response resp) {
-        Response response = resp;
+    private Response processResponse(final Response rsp) {
+        Response response = rsp;
         for (int i = 0, size = responseProcessors.size(); i < size; i++) {
             response = responseProcessors.get(i).process(response);
         }
@@ -87,7 +88,7 @@ public final class NetBird {
     }
 
     public void cancel(@NonNull Object tag) {
-        sender.cancel(tag);
+        sender.cancel(Utils.nonNull(tag, "tag == null"));
     }
 
     public void cancelAll() {
@@ -137,14 +138,14 @@ public final class NetBird {
         /**
          * @param baseUrl http/https，如果 {@link Request.Builder#url(String)} 未设置 url 则会以此代替
          */
-        public Builder(String baseUrl) {
+        public Builder(@NonNull String baseUrl) {
             this.baseUrl = Utils.checkedHttp(baseUrl);
         }
 
         /**
          * 配置请求线程池，非必须，一般无须设置采用默认即可
          */
-        public Builder executor(ExecutorService executor) {
+        public Builder executor(@NonNull ExecutorService executor) {
             this.executor = Utils.nonNull(executor, "executor == null");
             return this;
         }
@@ -156,7 +157,7 @@ public final class NetBird {
          * Note: 调用会依添加的顺序进行，请谨慎修改 {@link Request} 中涉及泛型的数据，否则可能导致数据解析或回调错误，如：
          * {@link cc.colorcat.netbird.parser.Parser}, {@link Response.Callback}
          */
-        public Builder addRequestProcessor(Processor<Request> reqProcessor) {
+        public Builder addRequestProcessor(@NonNull Processor<Request> reqProcessor) {
             requestProcessors.add(Utils.nonNull(reqProcessor, "reqProcessor == null"));
             return this;
         }
@@ -167,8 +168,8 @@ public final class NetBird {
          * <p>
          * Note: 调用会依添加的顺序进行，请谨慎调用 {@link Response#body()}, {@link ResponseBody} 可能只能读取一次。
          */
-        public Builder addResponseProcessor(Processor<Response> repProcessor) {
-            responseProcessors.add(repProcessor);
+        public Builder addResponseProcessor(@NonNull Processor<Response> repProcessor) {
+            responseProcessors.add(Utils.nonNull(repProcessor, "repProcessor == null"));
             return this;
         }
 

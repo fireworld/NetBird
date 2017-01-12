@@ -39,7 +39,7 @@ public final class HttpSender implements Sender {
 
     @NonNull
     @Override
-    public Response send(String baseUrl, @NonNull Request<?> req, Object tag) {
+    public Response send(String baseUrl, Request<?> req, Object tag) {
         int code = Const.CODE_CONNECT_ERROR;
         String msg = Const.MSG_CONNECT_ERROR;
         Map<String, List<String>> map = null;
@@ -69,13 +69,11 @@ public final class HttpSender implements Sender {
 
     @Override
     public void cancel(Object tag) {
-        if (tag != null) {
-            HttpURLConnection conn = running.get(tag);
-            if (conn != null) {
-                conn.disconnect();
-            }
-            running.remove(tag);
+        HttpURLConnection conn = running.get(tag);
+        if (conn != null) {
+            conn.disconnect();
         }
+        running.remove(tag);
     }
 
     @Override
