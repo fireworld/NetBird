@@ -12,7 +12,7 @@ import cc.colorcat.netbird.response.Response;
 public interface Sender {
 
     @NonNull
-    Response send(String baseUrl, @NonNull Request<?> req, Object tag);
+    Response send(String baseUrl, Request<?> req, Object tag);
 
     void cancel(Object tag);
 
