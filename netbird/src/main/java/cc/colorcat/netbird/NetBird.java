@@ -50,17 +50,17 @@ public final class NetBird {
                 new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
     }
 
-    public <T> Object sendRequest(@NonNull final Request<T> req) {
+    public <T> Object sendRequest(@NonNull Request<T> req) {
         final Object tag = System.currentTimeMillis();
         Request<T> request = processRequest(req);
         if (runningReqs.add(request)) {
-            executor.submit(new Task<>(this, req, tag));
+            executor.submit(new Task<>(this, request, tag));
         } else {
-            req.onStart();
+            request.onStart();
             processResponse(FAIL_RESPONSE);
             @SuppressWarnings("unchecked")
             NetworkData<? extends T> data = FAIL_DATA;
-            req.deliver(data);
+            request.deliver(data);
         }
         return tag;
     }
