@@ -46,8 +46,10 @@ public final class NetBird {
     private static ExecutorService defaultService() {
 //        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
 //                new SynchronousQueue<Runnable>(), Utils.threadFactory("NetBird", false));
-        return new ThreadPoolExecutor(6, 10, 60L, TimeUnit.SECONDS,
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(6, 10, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
+        executor.allowCoreThreadTimeOut(true);
+        return executor;
     }
 
     public <T> Object sendRequest(@NonNull Request<T> req) {
