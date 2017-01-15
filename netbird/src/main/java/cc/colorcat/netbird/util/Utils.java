@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
+import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.Response;
 
 /**
@@ -67,6 +68,15 @@ public class Utils {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String url(String baseUrl, Request<?> req) {
+        String url = Utils.emptyElse(req.url(), baseUrl);
+        String path = req.path();
+        if (!Utils.isEmpty(path)) {
+            url += path;
+        }
+        return url;
     }
 
     public static String checkedHttp(String url) {

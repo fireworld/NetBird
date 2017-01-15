@@ -60,6 +60,23 @@ public final class IoUtils {
         }
     }
 
+    public static String readAndClose(InputStream is, @Nullable Charset charset) throws IOException {
+        BufferedReader br = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            Charset c = Utils.nullElse(charset, Charset.defaultCharset());
+            Reader reader = c != null ? new InputStreamReader(is, c) : new InputStreamReader(is);
+            br = new BufferedReader(reader);
+            char[] buffer = new char[1024];
+            for (int length = br.read(buffer); length != -1; length = br.read(buffer)) {
+                sb.append(buffer, 0, length);
+            }
+            return sb.toString();
+        } finally {
+            close(br);
+        }
+    }
+
     public static byte[] readAndClose(InputStream is) throws IOException {
         byte[] result = null;
         BufferedInputStream bis = null;
