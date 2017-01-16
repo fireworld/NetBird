@@ -40,4 +40,5 @@ project.ext {
     supportAppcompat = "com.android.support:appcompat-v7:${supportVersion}"
     junit = 'junit:junit:4.12'
     gson = 'com.google.code.gson:gson:2.8.0'
+    okhttp = 'com.squareup.okhttp3:okhttp:3.5.0'
 }
