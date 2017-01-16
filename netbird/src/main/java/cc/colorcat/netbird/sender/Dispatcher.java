@@ -14,7 +14,9 @@ public interface Dispatcher {
     @NonNull
     Response dispatch(String baseUrl, Request<?> req);
 
-    void cancel(Object tag);
+    void finish(Request<?> req);
+
+    void cancel(Request<?> req);
 
     void cancelAll();
 }

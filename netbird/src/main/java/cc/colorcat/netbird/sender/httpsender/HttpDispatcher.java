@@ -19,6 +19,7 @@ import cc.colorcat.netbird.request.RequestBody;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.util.Const;
+import cc.colorcat.netbird.util.IoUtils;
 import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
 
@@ -87,7 +88,8 @@ public final class HttpDispatcher implements Dispatcher {
     }
 
     @Override
-    public void cancel(Object tag) {
+    public void finish(Request<?> req) {
+        final Object tag = req.tag();
         HttpURLConnection conn = running.get(tag);
         if (conn != null) {
             conn.disconnect();
@@ -97,16 +99,17 @@ public final class HttpDispatcher implements Dispatcher {
     }
 
     @Override
+    public void cancel(Request<?> req) {
+        finish(req);
+    }
+
+    @Override
     public void cancelAll() {
         Collection<HttpURLConnection> connections = running.values();
         running.clear();
         for (HttpURLConnection conn : connections) {
             conn.disconnect();
         }
-//        for (Object tag : running.keySet()) {
-//            running.get(tag).disconnect();
-//            running.remove(tag);
-//        }
     }
 
     private HttpURLConnection createConnection(String baseUrl, Request<?> req) throws IOException {
@@ -153,9 +156,14 @@ public final class HttpDispatcher implements Dispatcher {
             long contentLength = body.contentLength();
             if (contentLength > 0) {
                 conn.setRequestProperty("Content-Type", body.contentType());
-                OutputStream os = conn.getOutputStream();
-                body.writeTo(os);
-                os.flush();
+                OutputStream os = null;
+                try {
+                    os = conn.getOutputStream();
+                    body.writeTo(os);
+                    os.flush();
+                } finally {
+                    IoUtils.close(os);
+                }
             }
         }
     }

@@ -109,7 +109,7 @@ public final class NetBird {
     private void finished(Request<?> req) {
         LogUtils.d("Size", "Running size = " + runningReqs.size());
         LogUtils.d("Size", "Waiting size = " + waitQueue.size());
-        dispatcher.cancel(req.tag());
+        dispatcher.finish(req);
         runningReqs.remove(req);
         LogUtils.i("Size", "Running size = " + runningReqs.size());
         LogUtils.i("Size", "Waiting size = " + waitQueue.size());
@@ -135,14 +135,12 @@ public final class NetBird {
 
     public void cancel(@NonNull Object tag) {
         cancelWait(Utils.nonNull(tag, "tag == null"));
-        dispatcher.cancel(tag);
-//        Iterator<Request<?>> iterator = runningReqs.iterator();
-//        while (iterator.hasNext()) {
-//            Request<?> req = iterator.next();
-//            if (req.tag().equals(tag)) {
-//                iterator.remove();
-//            }
-//        }
+        for (Request<?> req : runningReqs) {
+            if (req.tag().equals(tag)) {
+                dispatcher.cancel(req);
+                runningReqs.remove(req);
+            }
+        }
     }
 
     public void cancelAll() {

@@ -51,15 +51,19 @@ final class FileBody extends RequestBody {
 
     @Override
     public void writeTo(OutputStream os) throws IOException {
-        InputStream is = new FileInputStream(file);
-        if (listener != null) {
-            long contentLength = contentLength();
-            if (contentLength > 0) {
-                is = InputWrapper.create(is, contentLength, listener);
+        InputStream is = null;
+        try {
+            is = new FileInputStream(file);
+            if (listener != null) {
+                long contentLength = contentLength();
+                if (contentLength > 0) {
+                    is = InputWrapper.create(is, contentLength, listener);
+                }
             }
+            IoUtils.justDump(is, os);
+        } finally {
+            IoUtils.close(is);
         }
-        IoUtils.justDump(is, os);
-        IoUtils.close(is);
     }
 
     String name() {
