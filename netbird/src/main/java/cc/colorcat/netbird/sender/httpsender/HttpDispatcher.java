@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +17,7 @@ import cc.colorcat.netbird.request.Method;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.request.RequestBody;
 import cc.colorcat.netbird.response.Response;
-import cc.colorcat.netbird.sender.Sender;
+import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.util.Const;
 import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
@@ -27,26 +28,44 @@ import cc.colorcat.netbird.util.Utils;
  * xx.ch@outlook.com
  */
 
-public final class HttpSender implements Sender {
+public final class HttpDispatcher implements Dispatcher {
     private Map<Object, HttpURLConnection> running = new ConcurrentHashMap<>();
     private int connectTimeOut = 5000;
     private int readTimeOut = 3000;
 
-    public HttpSender(int connectTimeOut, int readTimeOut) {
+    public HttpDispatcher() {
+
+    }
+
+    public HttpDispatcher(int connectTimeOut, int readTimeOut) {
         this.connectTimeOut = connectTimeOut;
         this.readTimeOut = readTimeOut;
     }
 
+    public HttpDispatcher setConnectTimeOut(int connectTimeOut) {
+        if (connectTimeOut > 0) {
+            this.connectTimeOut = connectTimeOut;
+        }
+        return this;
+    }
+
+    public HttpDispatcher setReadTimeOut(int readTimeOut) {
+        if (readTimeOut > 0) {
+            this.readTimeOut = readTimeOut;
+        }
+        return this;
+    }
+
     @NonNull
     @Override
-    public Response send(String baseUrl, Request<?> req, Object tag) {
+    public Response dispatch(String baseUrl, Request<?> req) {
         int code = Const.CODE_CONNECT_ERROR;
         String msg = Const.MSG_CONNECT_ERROR;
         Map<String, List<String>> map = null;
         InputStream is = null;
         try {
             HttpURLConnection conn = createConnection(baseUrl, req);
-            running.put(tag, conn);
+            running.put(req.tag(), conn);
             if (req.method() == Method.POST) {
                 addBodyIfExists(conn, req);
             }
@@ -72,16 +91,22 @@ public final class HttpSender implements Sender {
         HttpURLConnection conn = running.get(tag);
         if (conn != null) {
             conn.disconnect();
+            running.remove(tag);
         }
-        running.remove(tag);
+        LogUtils.i("Size", "HttpDispatcher Running Size = " + running.size());
     }
 
     @Override
     public void cancelAll() {
-        for (Object tag : running.keySet()) {
-            running.get(tag).disconnect();
-            running.remove(tag);
+        Collection<HttpURLConnection> connections = running.values();
+        running.clear();
+        for (HttpURLConnection conn : connections) {
+            conn.disconnect();
         }
+//        for (Object tag : running.keySet()) {
+//            running.get(tag).disconnect();
+//            running.remove(tag);
+//        }
     }
 
     private HttpURLConnection createConnection(String baseUrl, Request<?> req) throws IOException {

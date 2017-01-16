@@ -12,4 +12,5 @@
     <string name="test">test</string>
     <string name="download_test">Download Test</string>
     <string name="test_proxy">Test Proxy</string>
+    <string name="cancel_all">Cancel All</string>
 </resources>

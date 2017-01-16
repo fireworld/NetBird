@@ -39,6 +39,14 @@
         android:text="@string/cancel_download_firefox"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/btn_cancel_all"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/cancel_all"
+        android:textAllCaps="false"/>
+
 
     <Button
         android:id="@+id/btn_get"

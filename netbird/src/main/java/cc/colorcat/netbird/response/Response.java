@@ -32,6 +32,10 @@ public class Response {
         );
     }
 
+    public static Response create(int code, @NonNull String msg, Headers headers, ResponseBody body) {
+        return new Response(code, Utils.nonNull(msg, "msg == null"), headers, body);
+    }
+
     protected Response(int code, @NonNull String msg, Headers headers, ResponseBody body) {
         this.code = code;
         this.msg = msg;

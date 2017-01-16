@@ -93,7 +93,7 @@ public class DownloadManager {
                         notifyNewTask();
                     }
                 }).build();
-        netBird.sendRequest(req);
+        netBird.dispatch(req);
     }
 
     private void initNotificationManager() {

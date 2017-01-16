@@ -9,10 +9,10 @@ import cc.colorcat.netbird.response.Response;
  * Created by mic on 16-3-11.
  * xx.ch@outlook.com
  */
-public interface Sender {
+public interface Dispatcher {
 
     @NonNull
-    Response send(String baseUrl, Request<?> req, Object tag);
+    Response dispatch(String baseUrl, Request<?> req);
 
     void cancel(Object tag);
 

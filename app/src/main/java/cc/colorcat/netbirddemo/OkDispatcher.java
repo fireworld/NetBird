@@ -7,20 +7,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import cc.colorcat.netbird.Headers;
 import cc.colorcat.netbird.io.InputWrapper;
 import cc.colorcat.netbird.request.Method;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.Response;
-import cc.colorcat.netbird.response.ResponseBodyImp;
-import cc.colorcat.netbird.sender.Sender;
+import cc.colorcat.netbird.response.ResponseBody;
+import cc.colorcat.netbird.response.SubResponseBody;
+import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.util.Const;
 import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
 import okhttp3.Cache;
+import okhttp3.Call;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -35,10 +39,11 @@ import okio.Okio;
  * xx.ch@outlook.com
  */
 
-public class OkSender implements Sender {
+public class OkDispatcher implements Dispatcher {
+    private Map<Object, Call> running = new ConcurrentHashMap<>();
     private OkHttpClient client;
 
-    public OkSender(@NonNull Context ctx) {
+    public OkDispatcher(@NonNull Context ctx) {
         File cachePath = new File(ctx.getCacheDir(), "NetBird");
         Cache cache = new Cache(cachePath, 50 * 1024 * 1000);
         client = new OkHttpClient.Builder().cache(cache).build();
@@ -46,62 +51,62 @@ public class OkSender implements Sender {
 
     @NonNull
     @Override
-    public Response send(String baseUrl, Request<?> req, Object tag) {
-        okhttp3.Request request = req.method() == Method.GET ? byGet(baseUrl, req, tag) : byPost(baseUrl, req, tag);
+    public Response dispatch(String baseUrl, Request<?> req) {
+        okhttp3.Request request = req.method() == Method.GET ? byGet(baseUrl, req) : byPost(baseUrl, req);
         int code = Const.CODE_CONNECT_ERROR;
         String msg = Const.MSG_CONNECT_ERROR;
         try {
-            okhttp3.Response rep = client.newCall(request).execute();
+            Call call = client.newCall(request);
+            running.put(req.tag(), call);
+            okhttp3.Response rep = call.execute();
+//            okhttp3.Response rep = client.newCall(request).execute();
             code = rep.code();
             msg = Utils.nullElse(rep.message(), msg);
-            okhttp3.ResponseBody body = rep.body();
-            InputStream data = body.byteStream();
+            okhttp3.ResponseBody okBody = rep.body();
+            InputStream data = okBody.byteStream();
             Headers headers = Headers.EMPTY;
-            okhttp3.Headers oHeaders = rep.headers();
-            if (oHeaders != null) {
-                headers = Headers.create(oHeaders.toMultimap());
+            okhttp3.Headers okHeaders = rep.headers();
+            if (okHeaders != null) {
+                headers = Headers.create(okHeaders.toMultimap());
             }
-            if (rep.isSuccessful() && data != null) {
-                long length = body.contentLength();
-                if (length > 0) {
-                    data = InputWrapper.create(data, length, req.loadListener());
-                }
-                Charset charset = body.contentType().charset(Charset.defaultCharset());
-                return Response.newSuccess(code, msg, headers, new ResponseBodyImp(data, charset));
+            if (rep.isSuccessful()) {
+                long length = okBody.contentLength();
+                ResponseBody body = SubResponseBody.create(data, req.loadListener(), length, okBody.contentType().charset());
+                if (body != null) return Response.newSuccess(code, msg, headers, body);
             }
         } catch (IOException e) {
             LogUtils.e(e);
             msg = Utils.emptyElse(e.getMessage(), Utils.formatMsg(msg, e));
         }
-
         return Response.newFailure(code, msg);
     }
 
-    private static Response createResponse(Request<?> req, okhttp3.Response rep) {
-        int code = rep.code();
-        String msg = Utils.nullElse(rep.message(), "");
-        okhttp3.ResponseBody body = rep.body();
-        InputStream data = body.byteStream();
-        Headers headers = Headers.EMPTY;
-        okhttp3.Headers oHeaders = rep.headers();
-        if (oHeaders != null) {
-            headers = Headers.create(oHeaders.toMultimap());
+    @Override
+    public void cancel(Object tag) {
+        Call call = running.get(tag);
+        if (call != null) {
+            call.cancel();
+            running.remove(tag);
         }
-        if (rep.isSuccessful() && data != null) {
-            long length = body.contentLength();
-            if (length > 0) {
-                data = InputWrapper.create(data, length, req.loadListener());
-            }
-            Charset charset = body.contentType().charset(Charset.defaultCharset());
-            return Response.newSuccess(code, msg, headers, new ResponseBodyImp(data, charset));
-        } else {
-            return Response.newFailure(code, msg);
-        }
+        LogUtils.i("Size", "OkDispatcher Running Size = " + running.size());
     }
 
-    private okhttp3.Request byGet(String baseUrl, Request<?> req, Object tag) {
-        okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
-        setHeader(builder, req);
+    @Override
+    public void cancelAll() {
+        Collection<Call> calls = running.values();
+        running.clear();
+        for (Call call : calls) {
+            call.cancel();
+        }
+//        for (Object tag : running.keySet()) {
+//            running.get(tag).cancel();
+//            running.remove(tag);
+//        }
+    }
+
+    private static okhttp3.Request byGet(String baseUrl, Request<?> req) {
+        okhttp3.Request.Builder builder = new okhttp3.Request.Builder().tag(req.tag());
+        addHeader(builder, req);
         String url = Utils.url(baseUrl, req);
         String params = req.encodedParams();
         if (!Utils.isEmpty(params)) {
@@ -110,15 +115,25 @@ public class OkSender implements Sender {
         return builder.url(url).build();
     }
 
-    private okhttp3.Request byPost(String baseUrl, Request<?> req, Object tag) {
-        okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
-        setHeader(builder, req);
+    private static okhttp3.Request byPost(String baseUrl, Request<?> req) {
+        okhttp3.Request.Builder builder = new okhttp3.Request.Builder().tag(req.tag());
+        addHeader(builder, req);
         String url = Utils.url(baseUrl, req);
         RequestBody body = req.packs().isEmpty() ? formBody(req) : multiBody(req);
         return builder.url(url).post(body).build();
     }
 
-    private okhttp3.RequestBody formBody(Request<?> req) {
+    private static void addHeader(okhttp3.Request.Builder builder, Request<?> req) {
+        List<String> hNames = req.headerNames();
+        if (!hNames.isEmpty()) {
+            List<String> hValues = req.headerValues();
+            for (int i = 0, size = hNames.size(); i < size; i++) {
+                builder.addHeader(hNames.get(i), hValues.get(i));
+            }
+        }
+    }
+
+    private static okhttp3.RequestBody formBody(Request<?> req) {
         FormBody.Builder builder = new FormBody.Builder();
         List<String> names = req.paramNames();
         if (!names.isEmpty()) {
@@ -130,7 +145,7 @@ public class OkSender implements Sender {
         return builder.build();
     }
 
-    private okhttp3.RequestBody multiBody(Request<?> req) {
+    private static okhttp3.RequestBody multiBody(Request<?> req) {
         MultipartBody.Builder builder = new MultipartBody.Builder();
         List<String> names = req.paramNames();
         if (!names.isEmpty()) {
@@ -168,26 +183,5 @@ public class OkSender implements Sender {
                 sink.writeAll(bs);
             }
         };
-    }
-
-    private void setHeader(okhttp3.Request.Builder builder, Request<?> req) {
-        List<String> hNames = req.headerNames();
-        if (!hNames.isEmpty()) {
-            List<String> hValues = req.headerValues();
-            for (int i = 0, size = hNames.size(); i < size; i++) {
-                builder.addHeader(hNames.get(i), hValues.get(i));
-            }
-        }
-    }
-
-
-    @Override
-    public void cancel(Object tag) {
-
-    }
-
-    @Override
-    public void cancelAll() {
-
     }
 }

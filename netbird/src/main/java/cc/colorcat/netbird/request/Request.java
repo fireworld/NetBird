@@ -35,6 +35,8 @@ public class Request<T> implements Comparable<Request> {
     private Response.LoadListener loadListener;
     private UploadListener uploadListener;
 
+    private Object tag;
+
     protected Request(Builder<T> builder) {
         this.paramNames = builder.paramNames;
         this.paramValues = builder.paramValues;
@@ -48,10 +50,15 @@ public class Request<T> implements Comparable<Request> {
         this.callback = builder.callback;
         this.loadListener = builder.loadListener;
         this.uploadListener = builder.uploadListener;
+        this.tag = builder.tag;
     }
 
     public Builder<T> newBuilder() {
         return new Builder<>(this);
+    }
+
+    public Object tag() {
+        return this.tag;
     }
 
     @NonNull
@@ -290,6 +297,8 @@ public class Request<T> implements Comparable<Request> {
         private Response.LoadListener loadListener;
         private UploadListener uploadListener;
 
+        private Object tag;
+
         protected Builder(Request<T> req) {
             this.paramNames = req.paramNames;
             this.paramValues = req.paramValues;
@@ -303,6 +312,7 @@ public class Request<T> implements Comparable<Request> {
             this.callback = req.callback;
             this.loadListener = req.loadListener;
             this.uploadListener = req.uploadListener;
+            this.tag = req.tag;
         }
 
         /**
@@ -314,6 +324,11 @@ public class Request<T> implements Comparable<Request> {
          */
         public Builder(@NonNull Parser<? extends T> parser) {
             this.parser = Utils.nonNull(parser, "parser == null");
+        }
+
+        public Builder<T> tag(Object tag) {
+            this.tag = tag;
+            return this;
         }
 
         /**
@@ -566,6 +581,7 @@ public class Request<T> implements Comparable<Request> {
 
         public Request<T> build() {
             if (packs != null && !packs.isEmpty()) this.method = Method.POST;
+            if (tag == null) tag = System.currentTimeMillis();
             return new Request<>(this);
         }
     }

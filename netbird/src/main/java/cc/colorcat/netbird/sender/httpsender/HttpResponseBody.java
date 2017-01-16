@@ -3,14 +3,13 @@ package cc.colorcat.netbird.sender.httpsender;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.Charset;
 
-import cc.colorcat.netbird.response.ResponseBody;
-import cc.colorcat.netbird.util.IoUtils;
+import cc.colorcat.netbird.Headers;
+import cc.colorcat.netbird.io.InputWrapper;
+import cc.colorcat.netbird.response.Response;
+import cc.colorcat.netbird.response.SubResponseBody;
 import cc.colorcat.netbird.util.Utils;
 
 /**
@@ -18,27 +17,25 @@ import cc.colorcat.netbird.util.Utils;
  * xx.ch@outlook.com
  */
 
-final class HttpResponseBody extends ResponseBody {
+final class HttpResponseBody extends SubResponseBody {
+
+    /**
+     * @return SubResponseBody or null if the given <tt>is</tt> is null
+     */
     @Nullable
-    private String charset;
-
-    static HttpResponseBody create(@NonNull InputStream is, @Nullable String charset) {
-        return new HttpResponseBody(is, charset);
+    public static HttpResponseBody create(@NonNull Headers headers, InputStream is, Response.LoadListener listener) {
+        if (is == null) return null;
+        InputStream data = is;
+        if (listener != null) {
+            long contentLength = Utils.quiteParse(headers.value("Content-Length"), -1L);
+            if (contentLength > 0) {
+                data = InputWrapper.create(data, contentLength, listener);
+            }
+        }
+        return new HttpResponseBody(data, Utils.charset(headers.value("Content-Type")));
     }
 
-    private HttpResponseBody(@NonNull InputStream is, @Nullable String charset) {
-        super(is);
-        this.charset = charset;
-    }
-
-    @Override
-    public String string() throws IOException {
-        return IoUtils.readAndClose(is, charset);
-    }
-
-    @Override
-    public Reader reader() {
-        Charset c = Utils.charset(this.charset);
-        return c != null ? new InputStreamReader(is, c) : new InputStreamReader(is);
+    private HttpResponseBody(@NonNull InputStream is, @Nullable Charset charset) {
+        super(is, charset);
     }
 }

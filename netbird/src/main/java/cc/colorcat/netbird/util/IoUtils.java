@@ -44,28 +44,14 @@ public final class IoUtils {
     }
 
     public static String readAndClose(InputStream is, @Nullable String charset) throws IOException {
-        BufferedReader br = null;
-        try {
-            StringBuilder sb = new StringBuilder();
-            Charset c = Utils.charset(charset);
-            Reader reader = c != null ? new InputStreamReader(is, c) : new InputStreamReader(is);
-            br = new BufferedReader(reader);
-            char[] buffer = new char[1024];
-            for (int length = br.read(buffer); length != -1; length = br.read(buffer)) {
-                sb.append(buffer, 0, length);
-            }
-            return sb.toString();
-        } finally {
-            close(br);
-        }
+        return readAndClose(is, Utils.charset(charset));
     }
 
     public static String readAndClose(InputStream is, @Nullable Charset charset) throws IOException {
         BufferedReader br = null;
         try {
             StringBuilder sb = new StringBuilder();
-            Charset c = Utils.nullElse(charset, Charset.defaultCharset());
-            Reader reader = c != null ? new InputStreamReader(is, c) : new InputStreamReader(is);
+            Reader reader = charset != null ? new InputStreamReader(is, charset) : new InputStreamReader(is);
             br = new BufferedReader(reader);
             char[] buffer = new char[1024];
             for (int length = br.read(buffer); length != -1; length = br.read(buffer)) {
@@ -97,7 +83,7 @@ public final class IoUtils {
         return result;
     }
 
-    public static void close(Closeable c1, Closeable c2) {
+    private static void close(Closeable c1, Closeable c2) {
         close(c1);
         close(c2);
     }

@@ -43,6 +43,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
+        ApiService.init(this);
 
         LogUtils.init(this);
         showToast("LogUtils.getLevel():" + LogUtils.getLevel());
@@ -54,6 +55,7 @@ public class LaunchActivity extends AppCompatActivity {
         findViewById(R.id.btn_jump).setOnClickListener(mClick);
         findViewById(R.id.btn_download).setOnClickListener(mClick);
         findViewById(R.id.btn_cancel_download).setOnClickListener(mClick);
+        findViewById(R.id.btn_cancel_all).setOnClickListener(mClick);
         findViewById(R.id.btn_get).setOnClickListener(mClick);
         findViewById(R.id.btn_post).setOnClickListener(mClick);
         findViewById(R.id.btn_test).setOnClickListener(mClick);
@@ -84,6 +86,9 @@ public class LaunchActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_cancel_download:
                     ApiService.cancel(mTag);
+                    break;
+                case R.id.btn_cancel_all:
+                    ApiService.cancelAll();
                     break;
                 case R.id.btn_get:
                     doGet();
@@ -117,19 +122,19 @@ public class LaunchActivity extends AppCompatActivity {
     private void downloadTest() {
         File path = new File(getExternalCacheDir(), "test.apk");
         Request<File> req = new Request.Builder<>(FileParser.create(path))
-                .url(DOWNLOAD_TEST)
+                .url("http://dldir1.qq.com/weixin/android/weixin653android980.apk")
                 .method(Method.GET)
                 .loadListener(new Response.LoadListener() {
                     @Override
                     public void onChanged(long read, long total, int percent) {
-                        LogUtils.e("Progress", read + " : " + total + " : " + percent);
+                        LogUtils.e("Download_WeChat", read + " : " + total + " : " + percent);
                     }
                 })
                 .callback(new Response.SimpleCallback<File>() {
                     @Override
                     public void onSuccess(@NonNull File result) {
                         showToast(result.getAbsolutePath());
-                        LogUtils.e("Progress", result.getAbsolutePath());
+                        LogUtils.e("Download_WeChat", result.getAbsolutePath());
                     }
 
                     @Override
@@ -204,29 +209,30 @@ public class LaunchActivity extends AppCompatActivity {
     }
 
     private void download() {
+        mTag = "DownloadFirefox";
         File down = getExternalCacheDir();
         File mFile = new File(down, "firefox.apk");
-        Request rq = new Request.Builder<>(FileParser.create(mFile)).callback(new Response.SimpleCallback<File>() {
+        Request rq = new Request.Builder<>(FileParser.create(mFile)).tag(mTag).callback(new Response.SimpleCallback<File>() {
             @Override
             public void onSuccess(@NonNull File result) {
                 String path = result.getAbsolutePath();
                 showToast("download success, the path is " + path);
-                LogUtils.i("Download", "download success, the path is " + path);
+                LogUtils.i("Download_Firefox", "download success, the path is " + path);
             }
 
             @Override
             public void onFailure(int code, @NonNull String msg) {
                 showToast("download failure, " + code + " : " + msg);
-                LogUtils.i("Download", "download failure, " + code + " : " + msg);
+                LogUtils.i("Download_Firefox", "download failure, " + code + " : " + msg);
             }
         }).loadListener(new Response.LoadListener() {
             @Override
             public void onChanged(long read, long total, int percent) {
-                LogUtils.e("Download", read + "/" + total + " " + read * 100 / total + "%" + " percent: " + percent);
+                LogUtils.e("Download_Firefox", read + "/" + total + " " + read * 100 / total + "%" + " percent: " + percent);
 
             }
         }).url(FIREFOX).build();
-        mTag = ApiService.call(rq);
+        ApiService.call(rq);
     }
 
     private void showToast(String msg) {

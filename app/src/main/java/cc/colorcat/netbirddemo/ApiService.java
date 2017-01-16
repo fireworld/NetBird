@@ -1,5 +1,6 @@
 package cc.colorcat.netbirddemo;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
@@ -27,8 +28,23 @@ public class ApiService {
     private static NetBird bird;
     private static final String baseUrl = "http://www.imooc.com/api";
 
-    static {
+//    static {
+//        bird = new NetBird.Builder(baseUrl)
+////                .addRequestProcessor(new Processor<Request>() {
+////                    @NonNull
+////                    @Override
+////                    public Request process(@NonNull Request request) {
+////                        return request.newBuilder().add("test1", "value1").add("test2", "value2").build();
+////                    }
+////                })
+//                .addRequestProcessor(new LogReqProcessor())
+//                .addResponseProcessor(new LogRepProcessor())
+//                .build();
+//    }
+
+    public static void init(Context ctx) {
         bird = new NetBird.Builder(baseUrl)
+                .dispatcher(new OkDispatcher(ctx))
 //                .addRequestProcessor(new Processor<Request>() {
 //                    @NonNull
 //                    @Override
@@ -42,11 +58,23 @@ public class ApiService {
     }
 
     public static Object call(Request<?> req) {
-        return bird.sendRequest(req);
+        return bird.dispatch(req);
     }
 
     public static void cancel(Object tag) {
         bird.cancel(tag);
+    }
+
+    public static void cancelAll() {
+        bird.cancelAll();
+    }
+
+    public static void cancelWait(Object tag) {
+        bird.cancelWait(tag);
+    }
+
+    public static void cancelAllWait() {
+        bird.cancelAllWait();
     }
 
     public static Object display(final ImageView view, String url) {

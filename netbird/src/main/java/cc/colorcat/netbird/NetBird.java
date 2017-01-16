@@ -3,8 +3,11 @@ package cc.colorcat.netbird;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -15,61 +18,102 @@ import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.NetworkData;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.response.ResponseBody;
-import cc.colorcat.netbird.sender.Sender;
-import cc.colorcat.netbird.sender.httpsender.HttpSender;
+import cc.colorcat.netbird.sender.Dispatcher;
+import cc.colorcat.netbird.sender.httpsender.HttpDispatcher;
 import cc.colorcat.netbird.util.Const;
+import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
+
 
 /**
  * Created by cxx on 2016/12/12.
  * xx.ch@outlook.com
  */
 public final class NetBird {
-    private static final Response FAIL_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
-    private static final NetworkData FAIL_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
+    private static final Response EXECUTING_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
+    private static final NetworkData EXECUTING_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
+    private final int maxRunning;
     private final Set<Request<?>> runningReqs = new CopyOnWriteArraySet<>();
+    private final Queue<Request<?>> waitQueue = new ConcurrentLinkedQueue<>();
     private final List<Processor<Request>> requestProcessors;
     private final List<Processor<Response>> responseProcessors;
     private final ExecutorService executor;
     private final String baseUrl;
-    private final Sender sender;
+    private final Dispatcher dispatcher;
 
 
     private NetBird(Builder builder) {
         this.requestProcessors = Utils.immutableList(builder.requestProcessors);
         this.responseProcessors = Utils.immutableList(builder.responseProcessors);
-        this.executor = Utils.nullElse(builder.executor, defaultService());
+        this.maxRunning = builder.maxRunning;
+        this.executor = Utils.nullElse(builder.executor, defaultService(this.maxRunning));
         this.baseUrl = builder.baseUrl;
-        this.sender = new HttpSender(builder.connectTimeOut, builder.readTimeOut);
+        Dispatcher dispatcher = builder.dispatcher;
+        if (dispatcher == null) {
+            dispatcher = new HttpDispatcher(builder.connectTimeOut, builder.readTimeOut);
+        }
+        this.dispatcher = dispatcher;
     }
 
-    private static ExecutorService defaultService() {
-//        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
-//                new SynchronousQueue<Runnable>(), Utils.threadFactory("NetBird", false));
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(6, 10, 60L, TimeUnit.SECONDS,
+    private static ExecutorService defaultService(int corePoolSize) {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, 10, 60L, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
         executor.allowCoreThreadTimeOut(true);
         return executor;
     }
 
-    public <T> Object sendRequest(@NonNull Request<T> req) {
+    public <T> Object dispatch(@NonNull Request<T> req) {
         Utils.nonNull(req, "req == null");
-        final Object tag = System.currentTimeMillis();
         Request<T> request = processRequest(req);
-        if (runningReqs.add(request)) {
-            executor.submit(new Task<>(this, request, tag));
+        if (!waitQueue.contains(request)) {
+            if (waitQueue.offer(request)) notifyNewRequest();
         } else {
-            request.onStart();
-            processResponse(FAIL_RESPONSE);
-            @SuppressWarnings("unchecked")
-            NetworkData<? extends T> data = FAIL_DATA;
-            request.deliver(data);
+            inExecuting(request);
         }
-        return tag;
+        return request.tag();
     }
 
-    private Response realSend(Request<?> req, Object tag) {
-        return sender.send(baseUrl, req, tag);
+    private void notifyNewRequest() {
+        if (runningReqs.size() < maxRunning && !waitQueue.isEmpty()) {
+            Request<?> request = waitQueue.poll();
+            if (runningReqs.add(request)) {
+                executor.execute(new Task<>(this, request));
+            } else {
+                inExecuting(request);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void inExecuting(Request<?> req) {
+        req.onStart();
+        processResponse(EXECUTING_RESPONSE);
+        NetworkData data = EXECUTING_DATA;
+        req.deliver(data);
+    }
+
+    private <T> void execute(Request<T> req) {
+        req.onStart();
+        Response response = dispatcher.dispatch(baseUrl, req);
+        response = processResponse(response);
+        ResponseBody body = response.body();
+        NetworkData<? extends T> data;
+        if (body != null && body.stream() != null) {
+            data = req.parse(response);
+        } else {
+            data = NetworkData.newFailure(response.code(), response.msg());
+        }
+        req.deliver(data);
+    }
+
+    private void finished(Request<?> req) {
+        LogUtils.d("Size", "Running size = " + runningReqs.size());
+        LogUtils.d("Size", "Waiting size = " + waitQueue.size());
+        dispatcher.cancel(req.tag());
+        runningReqs.remove(req);
+        LogUtils.i("Size", "Running size = " + runningReqs.size());
+        LogUtils.i("Size", "Waiting size = " + waitQueue.size());
+        notifyNewRequest();
     }
 
     @SuppressWarnings("unchecked")
@@ -90,41 +134,52 @@ public final class NetBird {
     }
 
     public void cancel(@NonNull Object tag) {
-        sender.cancel(Utils.nonNull(tag, "tag == null"));
+        cancelWait(Utils.nonNull(tag, "tag == null"));
+        dispatcher.cancel(tag);
+//        Iterator<Request<?>> iterator = runningReqs.iterator();
+//        while (iterator.hasNext()) {
+//            Request<?> req = iterator.next();
+//            if (req.tag().equals(tag)) {
+//                iterator.remove();
+//            }
+//        }
     }
 
     public void cancelAll() {
-        sender.cancelAll();
+        cancelAllWait();
+        dispatcher.cancelAll();
+        runningReqs.clear();
+    }
+
+    public void cancelWait(@NonNull Object tag) {
+        Iterator<Request<?>> iterator = waitQueue.iterator();
+        while (iterator.hasNext()) {
+            Request<?> req = iterator.next();
+            if (req.tag().equals(tag)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    public void cancelAllWait() {
+        waitQueue.clear();
     }
 
     private static class Task<T> implements Runnable {
         private final NetBird bird;
         private final Request<T> req;
-        private final Object tag;
 
-        private Task(NetBird bird, Request<T> req, Object tag) {
+        private Task(NetBird bird, Request<T> req) {
             this.bird = bird;
             this.req = req;
-            this.tag = tag;
         }
 
         @Override
         public void run() {
             try {
-                req.onStart();
-                Response response = bird.realSend(req, tag);
-                response = bird.processResponse(response);
-                ResponseBody body = response.body();
-                NetworkData<? extends T> data;
-                if (body != null && body.stream() != null) {
-                    data = req.parse(response);
-                } else {
-                    data = NetworkData.newFailure(response.code(), response.msg());
-                }
-                req.deliver(data);
+                bird.execute(req);
             } finally {
-                bird.sender.cancel(tag);
-                bird.runningReqs.remove(req);
+                bird.finished(req);
             }
         }
     }
@@ -133,7 +188,9 @@ public final class NetBird {
         private List<Processor<Request>> requestProcessors = new ArrayList<>(4);
         private List<Processor<Response>> responseProcessors = new ArrayList<>(4);
         private ExecutorService executor;
+        private Dispatcher dispatcher;
         private String baseUrl;
+        private int maxRunning = 6;
         private int readTimeOut = 3000;
         private int connectTimeOut = 5000;
 
@@ -142,6 +199,14 @@ public final class NetBird {
          */
         public Builder(@NonNull String baseUrl) {
             this.baseUrl = Utils.checkedHttp(baseUrl);
+        }
+
+        /**
+         * 设置请求客户端，非必须，默认为 {@link HttpDispatcher}
+         */
+        public Builder dispatcher(@NonNull Dispatcher dispatcher) {
+            this.dispatcher = Utils.nonNull(dispatcher, "dispatcher == null");
+            return this;
         }
 
         /**
@@ -172,6 +237,13 @@ public final class NetBird {
          */
         public Builder addResponseProcessor(@NonNull Processor<Response> repProcessor) {
             responseProcessors.add(Utils.nonNull(repProcessor, "repProcessor == null"));
+            return this;
+        }
+
+        public Builder maxRunning(int maxRunning) {
+            if (maxRunning > 0) {
+                this.maxRunning = maxRunning;
+            }
             return this;
         }
 

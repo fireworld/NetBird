@@ -36,6 +36,11 @@ public class MainActivity extends Activity {
         initData();
     }
 
+    @Override
+    protected void onDestroy() {
+        ApiService.cancelAll();
+        super.onDestroy();
+    }
 
     private void initListView() {
         ListView listView = (ListView) findViewById(R.id.lv_main);
@@ -46,7 +51,7 @@ public class MainActivity extends Activity {
                         .setText(R.id.tv_description, courseBean.getDescription());
 
                 final ImageView imageView = holder.getView(R.id.iv_icon);
-                ApiService.display(imageView, courseBean.getPicSmall());
+                ApiService.display(imageView, courseBean.getPicBig());
             }
         };
         listView.setAdapter(mAdapter);

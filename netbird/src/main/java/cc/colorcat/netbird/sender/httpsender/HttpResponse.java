@@ -5,10 +5,8 @@ import android.support.annotation.NonNull;
 import java.io.InputStream;
 
 import cc.colorcat.netbird.Headers;
-import cc.colorcat.netbird.io.InputWrapper;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.response.ResponseBody;
-import cc.colorcat.netbird.util.Utils;
 
 
 /**
@@ -19,18 +17,7 @@ import cc.colorcat.netbird.util.Utils;
 final class HttpResponse extends Response {
 
     static HttpResponse create(@NonNull Headers headers, InputStream is, int code, @NonNull String msg, LoadListener listener) {
-        InputStream data = is;
-        HttpResponseBody body = null;
-        if (data != null) {
-            if (listener != null) {
-                long contentLength = Utils.quiteParse(headers.value("Content-Length"), -1L);
-                if (contentLength > 0) {
-                    data = InputWrapper.create(data, contentLength, listener);
-                }
-            }
-            String charset = Utils.parseCharset(headers.value("Content-Type"));
-            body = HttpResponseBody.create(data, charset);
-        }
+        HttpResponseBody body = HttpResponseBody.create(headers, is, listener);
         return new HttpResponse(code, msg, headers, body);
     }
 

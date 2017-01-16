@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 import cc.colorcat.netbird.util.IoUtils;
 import cc.colorcat.netbird.util.Utils;
@@ -14,7 +16,7 @@ import cc.colorcat.netbird.util.Utils;
  * xx.ch@outlook.com
  */
 
-public abstract class ResponseBody {
+public class ResponseBody {
     protected InputStream is;
 
     protected ResponseBody(@NonNull InputStream is) {
@@ -25,11 +27,15 @@ public abstract class ResponseBody {
         return is;
     }
 
-    public abstract String string() throws IOException;
+    public String string() throws IOException {
+        return IoUtils.readAndClose(is, (Charset) null);
+    }
 
     public byte[] bytes() throws IOException {
         return IoUtils.readAndClose(is);
     }
 
-    public abstract Reader reader();
+    public Reader reader() {
+        return new InputStreamReader(is);
+    }
 }
