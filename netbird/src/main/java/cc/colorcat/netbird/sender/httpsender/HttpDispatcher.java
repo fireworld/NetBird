@@ -1,7 +1,9 @@
 package cc.colorcat.netbird.sender.httpsender;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,28 +33,41 @@ import cc.colorcat.netbird.util.Utils;
 
 public final class HttpDispatcher implements Dispatcher {
     private Map<Object, HttpURLConnection> running = new ConcurrentHashMap<>();
-    private int connectTimeOut = 5000;
-    private int readTimeOut = 3000;
+    private boolean enableCache = false;
+    private int connectTimeOut = 10000;
+    private int readTimeOut = 10000;
 
     public HttpDispatcher() {
 
     }
 
-    public HttpDispatcher(int connectTimeOut, int readTimeOut) {
-        this.connectTimeOut = connectTimeOut;
-        this.readTimeOut = readTimeOut;
-    }
-
-    public HttpDispatcher setConnectTimeOut(int connectTimeOut) {
-        if (connectTimeOut > 0) {
-            this.connectTimeOut = connectTimeOut;
+    @Override
+    public HttpDispatcher connectTimeOut(int timeOut) {
+        if (timeOut > 0) {
+            this.connectTimeOut = timeOut;
         }
         return this;
     }
 
-    public HttpDispatcher setReadTimeOut(int readTimeOut) {
-        if (readTimeOut > 0) {
-            this.readTimeOut = readTimeOut;
+    @Override
+    public HttpDispatcher readTimeOut(int timeOut) {
+        if (timeOut > 0) {
+            this.readTimeOut = timeOut;
+        }
+        return this;
+    }
+
+    @Override
+    public HttpDispatcher enableCache(Context ctx, long cacheSize) {
+        try {
+            File httpCacheDir = new File(ctx.getCacheDir(), "NetBird");
+            Class.forName("android.net.http.HttpResponseCache")
+                    .getMethod("install", File.class, long.class)
+                    .invoke(null, httpCacheDir, cacheSize);
+            this.enableCache = true;
+        } catch (Exception e) {
+            LogUtils.e(e);
+            this.enableCache = false;
         }
         return this;
     }
@@ -100,13 +115,16 @@ public final class HttpDispatcher implements Dispatcher {
 
     @Override
     public void cancel(Request<?> req) {
-        finish(req);
+        final Object tag = req.tag();
+        HttpURLConnection conn = running.get(tag);
+        if (conn != null) {
+            conn.disconnect();
+        }
     }
 
     @Override
     public void cancelAll() {
         Collection<HttpURLConnection> connections = running.values();
-        running.clear();
         for (HttpURLConnection conn : connections) {
             conn.disconnect();
         }
@@ -129,7 +147,7 @@ public final class HttpDispatcher implements Dispatcher {
         if (m == Method.POST) {
             conn.setDoOutput(true);
         }
-        conn.setUseCaches(false);
+        conn.setUseCaches(this.enableCache);
         List<String> names = req.headerNames();
         if (!names.isEmpty()) {
             List<String> values = req.headerValues();

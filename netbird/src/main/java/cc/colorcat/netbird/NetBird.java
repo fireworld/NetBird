@@ -1,5 +1,6 @@
 package cc.colorcat.netbird;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -50,7 +51,8 @@ public final class NetBird {
         this.baseUrl = builder.baseUrl;
         Dispatcher dispatcher = builder.dispatcher;
         if (dispatcher == null) {
-            dispatcher = new HttpDispatcher(builder.connectTimeOut, builder.readTimeOut);
+            dispatcher = new HttpDispatcher().connectTimeOut(builder.connectTimeOut).readTimeOut(builder.readTimeOut);
+            if (builder.ctx != null) dispatcher.enableCache(builder.ctx, builder.cacheSize);
         }
         this.dispatcher = dispatcher;
     }
@@ -138,7 +140,7 @@ public final class NetBird {
         for (Request<?> req : runningReqs) {
             if (req.tag().equals(tag)) {
                 dispatcher.cancel(req);
-                runningReqs.remove(req);
+//                runningReqs.remove(req);
             }
         }
     }
@@ -146,7 +148,7 @@ public final class NetBird {
     public void cancelAll() {
         cancelAllWait();
         dispatcher.cancelAll();
-        runningReqs.clear();
+//        runningReqs.clear();
     }
 
     public void cancelWait(@NonNull Object tag) {
@@ -189,8 +191,10 @@ public final class NetBird {
         private Dispatcher dispatcher;
         private String baseUrl;
         private int maxRunning = 6;
-        private int readTimeOut = 3000;
-        private int connectTimeOut = 5000;
+        private int readTimeOut = 10000;
+        private int connectTimeOut = 10000;
+        private long cacheSize;
+        private Context ctx;
 
         /**
          * @param baseUrl http/https，如果 {@link Request.Builder#url(String)} 未设置 url 则会以此代替
@@ -212,6 +216,13 @@ public final class NetBird {
          */
         public Builder executor(@NonNull ExecutorService executor) {
             this.executor = Utils.nonNull(executor, "executor == null");
+            return this;
+        }
+
+        public Builder enableCache(Context ctx, long cacheSize) {
+            this.ctx = Utils.nonNull(ctx, "ctx == null");
+            long minSize = 5 * 1024 * 1024;
+            this.cacheSize = cacheSize < minSize ? minSize : cacheSize;
             return this;
         }
 

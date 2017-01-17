@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import cc.colorcat.netbird.Headers;
 import cc.colorcat.netbird.io.InputWrapper;
@@ -43,10 +44,32 @@ public class OkDispatcher implements Dispatcher {
     private Map<Object, Call> running = new ConcurrentHashMap<>();
     private OkHttpClient client;
 
-    public OkDispatcher(@NonNull Context ctx) {
+    public OkDispatcher() {
+        client = new OkHttpClient.Builder().build();
+    }
+
+    @Override
+    public OkDispatcher connectTimeOut(int timeOut) {
+        if (timeOut > 0) {
+            client = client.newBuilder().connectTimeout(timeOut, TimeUnit.MILLISECONDS).build();
+        }
+        return this;
+    }
+
+    @Override
+    public OkDispatcher readTimeOut(int timeOut) {
+        if (timeOut > 0) {
+            client = client.newBuilder().readTimeout(timeOut, TimeUnit.MILLISECONDS).build();
+        }
+        return this;
+    }
+
+    @Override
+    public OkDispatcher enableCache(Context ctx, long cacheSize) {
         File cachePath = new File(ctx.getCacheDir(), "NetBird");
-        Cache cache = new Cache(cachePath, 50 * 1024 * 1000);
-        client = new OkHttpClient.Builder().cache(cache).build();
+        Cache cache = new Cache(cachePath, cacheSize);
+        client = client.newBuilder().cache(cache).build();
+        return this;
     }
 
     @NonNull
@@ -59,7 +82,6 @@ public class OkDispatcher implements Dispatcher {
             Call call = client.newCall(request);
             running.put(req.tag(), call);
             okhttp3.Response rep = call.execute();
-//            okhttp3.Response rep = client.newCall(request).execute();
             code = rep.code();
             msg = Utils.nullElse(rep.message(), msg);
             okhttp3.ResponseBody okBody = rep.body();
@@ -94,14 +116,12 @@ public class OkDispatcher implements Dispatcher {
         Call call = running.get(tag);
         if (call != null) {
             call.cancel();
-            running.remove(tag);
         }
     }
 
     @Override
     public void cancelAll() {
         Collection<Call> calls = running.values();
-        running.clear();
         for (Call call : calls) {
             call.cancel();
         }

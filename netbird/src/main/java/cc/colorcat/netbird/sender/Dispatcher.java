@@ -1,5 +1,6 @@
 package cc.colorcat.netbird.sender;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import cc.colorcat.netbird.request.Request;
@@ -13,6 +14,12 @@ public interface Dispatcher {
 
     @NonNull
     Response dispatch(String baseUrl, Request<?> req);
+
+    Dispatcher connectTimeOut(int timeOut);
+
+    Dispatcher readTimeOut(int timeOut);
+
+    Dispatcher enableCache(Context ctx, long cacheSize);
 
     void finish(Request<?> req);
 

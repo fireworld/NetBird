@@ -37,6 +37,11 @@ public class LaunchActivity extends AppCompatActivity {
     public static final String HOST_LOCAL = "http://192.168.0.23:8080";
     public static final String PATH_LOCAL = "/sayhello";
 
+    public static final String UPLOAD_URL = "https://www.zzb18.com";
+    public static final String UPLOAD_PATH = "/zzbh5/appUserCenter/userImgFileUpload";
+    public static final String UPLOAD_R = "EG1%2BqMqxNTqzkZUr%2BC5X%2FqhyyLzSWD3U86itr%2FeAgVF4B%2F3%2BfKfKooXWVt1%2F3ZHhNNUvawzU1fOxNW7jnDBwpk4FMjHvM9In9eADrJTLl2cPcBmHn8KILckYxj5t3BlkCiwivMKW4%2BoD3o989mybD%2BO4q%2Fw6EaAtEZ0GMnzAe3dh9vb%2FBM9JzaQjn2UxXhtsrDikjwx0N0CslyYW7L80L4HA7RQd01qkgPTCRZq%2FxRSXbry%2FBIB6y5%2FBJSW2fm5L2YcCdDMTLQGTfeZwwm9NF%2FEADo5Bz8GXtwtNzo8qEXQMv4DlGmRLx64EC856zw5dTwv%2B4wzfsoGkD%2BgAEs0cTel9kq9qOg88QqyjA%2B%2FDfzZixtNOpJPykBJyYXJTF5hltD7UltGLknZvB2ivG7yiL14d3pT0j543Xwd4Odmpk3C01vBidM43nBTuwYSFn3bF6eS4hG6%2Bo9Xtdkmr2gBm97kxi3ZzPl8EjWOIvIrD4ttzHMdFBtCf3CcVz7wfufu%2BU3ooGv6DqNNKQ6qh8F7Zwm4T4KFfcGgb%2BmFFivxOoeXaWzNKuUrtWkEz%2FAR6gm9o";
+    public static final String UPLOAD_SIGN = "5314fe73d7cd3fd28db3d6cdd40b2b5c";
+
     private Object mTag;
 
     @Override
@@ -188,7 +193,7 @@ public class LaunchActivity extends AppCompatActivity {
                 .callback(new Response.SimpleCallback<String>() {
                     @Override
                     public void onSuccess(@NonNull String result) {
-                        LogUtils.i("Upload", result);
+                        LogUtils.i("Upload", CryptoTool.decryptByDefault(result));
                         showToast("上传任务完成");
                     }
 
@@ -203,7 +208,7 @@ public class LaunchActivity extends AppCompatActivity {
                         LogUtils.e("Upload", written + "/" + total + " " + written * 100 / total + "%" + " percent: " + percent);
                     }
                 })
-                .url(HOST_LOCAL).path(PATH_LOCAL).add("name", "cxx").add("pwd", "123456").add("zh", "中文测试")
+                .url(UPLOAD_URL).path(UPLOAD_PATH).add("r", UPLOAD_R).add("sign", UPLOAD_SIGN)
                 .addFile("userHeardImg", "image/jpeg", userHeardImg).method(Method.POST).build();
         ApiService.call(req);
     }
@@ -229,7 +234,6 @@ public class LaunchActivity extends AppCompatActivity {
             @Override
             public void onChanged(long read, long total, int percent) {
                 LogUtils.e("Download_Firefox", read + "/" + total + " " + read * 100 / total + "%" + " percent: " + percent);
-
             }
         }).url(FIREFOX).build();
         ApiService.call(rq);
