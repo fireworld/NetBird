@@ -82,13 +82,20 @@ public class OkDispatcher implements Dispatcher {
     }
 
     @Override
-    public void cancel(Object tag) {
+    public void finish(Request<?> req) {
+        final Object tag = req.tag();
+        running.remove(tag);
+        LogUtils.i("Size", "OkDispatcher Running Size = " + running.size());
+    }
+
+    @Override
+    public void cancel(Request<?> req) {
+        final Object tag = req.tag();
         Call call = running.get(tag);
         if (call != null) {
             call.cancel();
             running.remove(tag);
         }
-        LogUtils.i("Size", "OkDispatcher Running Size = " + running.size());
     }
 
     @Override
@@ -98,10 +105,6 @@ public class OkDispatcher implements Dispatcher {
         for (Call call : calls) {
             call.cancel();
         }
-//        for (Object tag : running.keySet()) {
-//            running.get(tag).cancel();
-//            running.remove(tag);
-//        }
     }
 
     private static okhttp3.Request byGet(String baseUrl, Request<?> req) {
