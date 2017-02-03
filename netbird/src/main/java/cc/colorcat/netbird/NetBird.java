@@ -33,42 +33,30 @@ import cc.colorcat.netbird.util.Utils;
 public final class NetBird {
     private static final Response EXECUTING_RESPONSE = Response.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private static final NetworkData EXECUTING_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
-    private final int maxRunning;
     private final Set<Request<?>> runningReqs = new CopyOnWriteArraySet<>();
-    private final Queue<Request<?>> waitQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Request<?>> waitingQueue = new ConcurrentLinkedQueue<>();
     private final List<Processor<Request>> requestProcessors;
     private final List<Processor<Response>> responseProcessors;
     private final ExecutorService executor;
-    private final String baseUrl;
     private final Dispatcher dispatcher;
+    private final String baseUrl;
+    private final int maxRunning;
 
 
     private NetBird(Builder builder) {
         this.requestProcessors = Utils.immutableList(builder.requestProcessors);
         this.responseProcessors = Utils.immutableList(builder.responseProcessors);
-        this.maxRunning = builder.maxRunning;
-        this.executor = Utils.nullElse(builder.executor, defaultService(this.maxRunning));
+        this.executor = builder.executor;
+        this.dispatcher = builder.dispatcher;
         this.baseUrl = builder.baseUrl;
-        Dispatcher dispatcher = builder.dispatcher;
-        if (dispatcher == null) {
-            dispatcher = new HttpDispatcher().connectTimeOut(builder.connectTimeOut).readTimeOut(builder.readTimeOut);
-            if (builder.ctx != null) dispatcher.enableCache(builder.ctx, builder.cacheSize);
-        }
-        this.dispatcher = dispatcher;
-    }
-
-    private static ExecutorService defaultService(int corePoolSize) {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, 10, 60L, TimeUnit.SECONDS,
-                new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
-        executor.allowCoreThreadTimeOut(true);
-        return executor;
+        this.maxRunning = builder.maxRunning;
     }
 
     public <T> Object dispatch(@NonNull Request<T> req) {
         Utils.nonNull(req, "req == null");
         Request<T> request = processRequest(req);
-        if (!waitQueue.contains(request)) {
-            if (waitQueue.offer(request)) notifyNewRequest();
+        if (!waitingQueue.contains(request)) {
+            if (waitingQueue.offer(request)) notifyNewRequest();
         } else {
             inExecuting(request);
         }
@@ -76,8 +64,8 @@ public final class NetBird {
     }
 
     private void notifyNewRequest() {
-        if (runningReqs.size() < maxRunning && !waitQueue.isEmpty()) {
-            Request<?> request = waitQueue.poll();
+        if (runningReqs.size() < maxRunning && !waitingQueue.isEmpty()) {
+            Request<?> request = waitingQueue.poll();
             if (runningReqs.add(request)) {
                 executor.execute(new Task<>(this, request));
             } else {
@@ -108,13 +96,13 @@ public final class NetBird {
         req.deliver(data);
     }
 
-    private void finished(Request<?> req) {
+    private void finish(Request<?> req) {
         LogUtils.d("Size", "Running size = " + runningReqs.size());
-        LogUtils.d("Size", "Waiting size = " + waitQueue.size());
+        LogUtils.d("Size", "Waiting size = " + waitingQueue.size());
         dispatcher.finish(req);
         runningReqs.remove(req);
         LogUtils.i("Size", "Running size = " + runningReqs.size());
-        LogUtils.i("Size", "Waiting size = " + waitQueue.size());
+        LogUtils.i("Size", "Waiting size = " + waitingQueue.size());
         notifyNewRequest();
     }
 
@@ -152,7 +140,7 @@ public final class NetBird {
     }
 
     public void cancelWait(@NonNull Object tag) {
-        Iterator<Request<?>> iterator = waitQueue.iterator();
+        Iterator<Request<?>> iterator = waitingQueue.iterator();
         while (iterator.hasNext()) {
             Request<?> req = iterator.next();
             if (req.tag().equals(tag)) {
@@ -162,7 +150,7 @@ public final class NetBird {
     }
 
     public void cancelAllWait() {
-        waitQueue.clear();
+        waitingQueue.clear();
     }
 
     private static class Task<T> implements Runnable {
@@ -179,12 +167,13 @@ public final class NetBird {
             try {
                 bird.execute(req);
             } finally {
-                bird.finished(req);
+                bird.finish(req);
             }
         }
     }
 
     public static class Builder {
+        private static final long CACHE_MIN_SIZE = 5 * 1024 * 1024;
         private List<Processor<Request>> requestProcessors = new ArrayList<>(4);
         private List<Processor<Response>> responseProcessors = new ArrayList<>(4);
         private ExecutorService executor;
@@ -219,10 +208,9 @@ public final class NetBird {
             return this;
         }
 
-        public Builder enableCache(Context ctx, long cacheSize) {
+        public Builder enableCache(@NonNull Context ctx, long cacheSize) {
             this.ctx = Utils.nonNull(ctx, "ctx == null");
-            long minSize = 5 * 1024 * 1024;
-            this.cacheSize = cacheSize < minSize ? minSize : cacheSize;
+            this.cacheSize = cacheSize < CACHE_MIN_SIZE ? CACHE_MIN_SIZE : cacheSize;
             return this;
         }
 
@@ -249,15 +237,19 @@ public final class NetBird {
             return this;
         }
 
+        /**
+         * @param maxRunning 并行请求的 {@link Request} 的数量限制
+         */
         public Builder maxRunning(int maxRunning) {
-            if (maxRunning > 0) {
-                this.maxRunning = maxRunning;
+            if (maxRunning <= 0) {
+                throw new IllegalArgumentException("maxRunning must be greater than 0");
             }
+            this.maxRunning = maxRunning;
             return this;
         }
 
         public Builder readTimeOut(int milliseconds) {
-            if (milliseconds < 0) {
+            if (milliseconds <= 0) {
                 throw new IllegalArgumentException("ReadTimeOut must be greater than 0");
             }
             this.readTimeOut = milliseconds;
@@ -265,7 +257,7 @@ public final class NetBird {
         }
 
         public Builder connectTimeOut(int milliseconds) {
-            if (milliseconds < 0) {
+            if (milliseconds <= 0) {
                 throw new IllegalArgumentException("ConnectTimeOut must be greater than 0");
             }
             this.connectTimeOut = milliseconds;
@@ -273,7 +265,23 @@ public final class NetBird {
         }
 
         public NetBird build() {
+            if (executor == null) {
+                executor = defaultService(maxRunning);
+            }
+            if (dispatcher == null) {
+                dispatcher = new HttpDispatcher();
+                dispatcher.setConnectTimeOut(connectTimeOut);
+                dispatcher.setReadTimeOut(readTimeOut);
+                if (ctx != null) dispatcher.enableCache(ctx, cacheSize);
+            }
             return new NetBird(this);
+        }
+
+        private static ExecutorService defaultService(int corePoolSize) {
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, 10, 60L, TimeUnit.SECONDS,
+                    new LinkedBlockingDeque<Runnable>(), new ThreadPoolExecutor.DiscardOldestPolicy());
+            executor.allowCoreThreadTimeOut(true);
+            return executor;
         }
     }
 }

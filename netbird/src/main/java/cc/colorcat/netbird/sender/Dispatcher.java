@@ -15,11 +15,11 @@ public interface Dispatcher {
     @NonNull
     Response dispatch(String baseUrl, Request<?> req);
 
-    Dispatcher connectTimeOut(int timeOut);
+    void setConnectTimeOut(int milliseconds);
 
-    Dispatcher readTimeOut(int timeOut);
+    void setReadTimeOut(int milliseconds);
 
-    Dispatcher enableCache(Context ctx, long cacheSize);
+    void enableCache(Context ctx, long cacheSize);
 
     void finish(Request<?> req);
 

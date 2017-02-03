@@ -37,28 +37,24 @@ public final class HttpDispatcher implements Dispatcher {
     private int connectTimeOut = 10000;
     private int readTimeOut = 10000;
 
-    public HttpDispatcher() {
-
-    }
-
     @Override
-    public HttpDispatcher connectTimeOut(int timeOut) {
-        if (timeOut > 0) {
-            this.connectTimeOut = timeOut;
+    public void setConnectTimeOut(int milliseconds) {
+        if (milliseconds <= 0) {
+            throw new IllegalArgumentException("ConnectTimeOut must be greater than 0");
         }
-        return this;
+        this.connectTimeOut = milliseconds;
     }
 
     @Override
-    public HttpDispatcher readTimeOut(int timeOut) {
-        if (timeOut > 0) {
-            this.readTimeOut = timeOut;
+    public void setReadTimeOut(int milliseconds) {
+        if (milliseconds <= 0) {
+            throw new IllegalArgumentException("ReadTimeOut must be greater than 0");
         }
-        return this;
+        this.readTimeOut = milliseconds;
     }
 
     @Override
-    public HttpDispatcher enableCache(Context ctx, long cacheSize) {
+    public void enableCache(Context ctx, long cacheSize) {
         try {
             File httpCacheDir = new File(ctx.getCacheDir(), "NetBird");
             Class.forName("android.net.http.HttpResponseCache")
@@ -69,7 +65,6 @@ public final class HttpDispatcher implements Dispatcher {
             LogUtils.e(e);
             this.enableCache = false;
         }
-        return this;
     }
 
     @NonNull

@@ -49,27 +49,29 @@ public class OkDispatcher implements Dispatcher {
     }
 
     @Override
-    public OkDispatcher connectTimeOut(int timeOut) {
-        if (timeOut > 0) {
-            client = client.newBuilder().connectTimeout(timeOut, TimeUnit.MILLISECONDS).build();
+    public void setConnectTimeOut(int milliseconds) {
+        if (milliseconds <= 0) {
+            throw new IllegalArgumentException("ConnectTimeOut must be greater than 0");
         }
-        return this;
+        client = client.newBuilder().connectTimeout(milliseconds, TimeUnit.MILLISECONDS).build();
     }
 
     @Override
-    public OkDispatcher readTimeOut(int timeOut) {
-        if (timeOut > 0) {
-            client = client.newBuilder().readTimeout(timeOut, TimeUnit.MILLISECONDS).build();
+    public void setReadTimeOut(int milliseconds) {
+        if (milliseconds <= 0) {
+            throw new IllegalArgumentException("ReadTimeOut must be greater than 0");
         }
-        return this;
+        client = client.newBuilder().readTimeout(milliseconds, TimeUnit.MILLISECONDS).build();
     }
 
     @Override
-    public OkDispatcher enableCache(Context ctx, long cacheSize) {
+    public void enableCache(Context ctx, long cacheSize) {
+        if (cacheSize <= 0L) {
+            throw new IllegalArgumentException("cacheSize must be greater than 0");
+        }
         File cachePath = new File(ctx.getCacheDir(), "NetBird");
         Cache cache = new Cache(cachePath, cacheSize);
         client = client.newBuilder().cache(cache).build();
-        return this;
     }
 
     @NonNull
