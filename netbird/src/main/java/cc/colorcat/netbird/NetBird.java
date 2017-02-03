@@ -22,7 +22,6 @@ import cc.colorcat.netbird.response.ResponseBody;
 import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.sender.httpsender.HttpDispatcher;
 import cc.colorcat.netbird.util.Const;
-import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
 
 
@@ -97,12 +96,8 @@ public final class NetBird {
     }
 
     private void finish(Request<?> req) {
-        LogUtils.d("Size", "Running size = " + runningReqs.size());
-        LogUtils.d("Size", "Waiting size = " + waitingQueue.size());
         dispatcher.finish(req);
         runningReqs.remove(req);
-        LogUtils.i("Size", "Running size = " + runningReqs.size());
-        LogUtils.i("Size", "Waiting size = " + waitingQueue.size());
         notifyNewRequest();
     }
 
@@ -128,7 +123,6 @@ public final class NetBird {
         for (Request<?> req : runningReqs) {
             if (req.tag().equals(tag)) {
                 dispatcher.cancel(req);
-//                runningReqs.remove(req);
             }
         }
     }
@@ -136,7 +130,6 @@ public final class NetBird {
     public void cancelAll() {
         cancelAllWait();
         dispatcher.cancelAll();
-//        runningReqs.clear();
     }
 
     public void cancelWait(@NonNull Object tag) {

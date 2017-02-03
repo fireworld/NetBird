@@ -108,7 +108,6 @@ public final class HttpDispatcher implements Dispatcher {
             conn.disconnect();
             running.remove(tag);
         }
-        LogUtils.i("Size", "HttpDispatcher Running Size = " + running.size());
     }
 
     @Override

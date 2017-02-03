@@ -109,7 +109,6 @@ public class OkDispatcher implements Dispatcher {
     public void finish(Request<?> req) {
         final Object tag = req.tag();
         running.remove(tag);
-        LogUtils.i("Size", "OkDispatcher Running Size = " + running.size());
     }
 
     @Override
