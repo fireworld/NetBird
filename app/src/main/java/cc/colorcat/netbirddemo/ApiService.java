@@ -45,8 +45,7 @@ public class ApiService {
     public static void init(Context ctx) {
         bird = new NetBird.Builder(baseUrl)
                 .enableCache(ctx, 50 * 1024 * 1024)
-//                .dispatcher(dispatcher)
-                .dispatcher(new OkDispatcher())
+//                .dispatcher(new OkDispatcher())
 //                .addRequestProcessor(new Processor<Request>() {
 //                    @NonNull
 //                    @Override
