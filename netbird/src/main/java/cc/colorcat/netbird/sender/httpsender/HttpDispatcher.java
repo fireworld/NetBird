@@ -55,11 +55,14 @@ public final class HttpDispatcher implements Dispatcher {
 
     @Override
     public void enableCache(Context ctx, long cacheSize) {
+        if (cacheSize <= 0L) {
+            throw new IllegalArgumentException("cacheSize must be greater than 0");
+        }
         try {
-            File httpCacheDir = new File(ctx.getCacheDir(), "NetBird");
+            File cachePath = new File(ctx.getCacheDir(), "NetBird");
             Class.forName("android.net.http.HttpResponseCache")
                     .getMethod("install", File.class, long.class)
-                    .invoke(null, httpCacheDir, cacheSize);
+                    .invoke(null, cachePath, cacheSize);
             this.enableCache = true;
         } catch (Exception e) {
             LogUtils.e(e);

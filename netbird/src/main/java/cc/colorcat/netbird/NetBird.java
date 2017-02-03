@@ -270,10 +270,10 @@ public final class NetBird {
             }
             if (dispatcher == null) {
                 dispatcher = new HttpDispatcher();
-                dispatcher.setConnectTimeOut(connectTimeOut);
-                dispatcher.setReadTimeOut(readTimeOut);
-                if (ctx != null) dispatcher.enableCache(ctx, cacheSize);
             }
+            dispatcher.setConnectTimeOut(connectTimeOut);
+            dispatcher.setReadTimeOut(readTimeOut);
+            if (ctx != null) dispatcher.enableCache(ctx, cacheSize);
             return new NetBird(this);
         }
 
