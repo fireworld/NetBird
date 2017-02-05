@@ -34,7 +34,7 @@ public final class NetBird {
     private static final NetworkData EXECUTING_DATA = NetworkData.newFailure(Const.CODE_EXECUTING, Const.MSG_EXECUTING);
     private final Set<Request<?>> runningReqs = new CopyOnWriteArraySet<>();
     private final Queue<Request<?>> waitingQueue = new ConcurrentLinkedQueue<>();
-    private final List<Processor<Request>> requestProcessors;
+    private final List<Processor<Request<?>>> requestProcessors;
     private final List<Processor<Response>> responseProcessors;
     private final ExecutorService executor;
     private final Dispatcher dispatcher;
@@ -105,7 +105,7 @@ public final class NetBird {
     private <T> Request<T> processRequest(final Request<T> req) {
         Request<T> request = req;
         for (int i = 0, size = requestProcessors.size(); i < size; i++) {
-            request = requestProcessors.get(i).process(request);
+            request = (Request<T>) requestProcessors.get(i).process(request);
         }
         return request;
     }
@@ -167,7 +167,7 @@ public final class NetBird {
 
     public static class Builder {
         private static final long CACHE_MIN_SIZE = 5 * 1024 * 1024;
-        private List<Processor<Request>> requestProcessors = new ArrayList<>(4);
+        private List<Processor<Request<?>>> requestProcessors = new ArrayList<>(4);
         private List<Processor<Response>> responseProcessors = new ArrayList<>(4);
         private ExecutorService executor;
         private Dispatcher dispatcher;
@@ -214,7 +214,7 @@ public final class NetBird {
          * Note: 调用会依添加的顺序进行，请谨慎修改 {@link Request} 中涉及泛型的数据，否则可能导致数据解析或回调错误，如：
          * {@link cc.colorcat.netbird.parser.Parser}, {@link Response.Callback}
          */
-        public Builder addRequestProcessor(@NonNull Processor<Request> reqProcessor) {
+        public Builder addRequestProcessor(@NonNull Processor<Request<?>> reqProcessor) {
             requestProcessors.add(Utils.nonNull(reqProcessor, "reqProcessor == null"));
             return this;
         }

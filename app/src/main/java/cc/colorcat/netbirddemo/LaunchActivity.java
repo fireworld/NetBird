@@ -209,7 +209,7 @@ public class LaunchActivity extends AppCompatActivity {
                     }
                 })
                 .url(UPLOAD_URL).path(UPLOAD_PATH).add("r", UPLOAD_R).add("sign", UPLOAD_SIGN)
-                .addFile("userHeardImg", "image/jpeg", userHeardImg).method(Method.POST).build();
+                .addPack("userHeardImg", "image/jpeg", userHeardImg).method(Method.POST).build();
         ApiService.call(req);
     }
 

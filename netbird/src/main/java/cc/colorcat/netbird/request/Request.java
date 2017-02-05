@@ -1,5 +1,6 @@
 package cc.colorcat.netbird.request;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -77,7 +78,7 @@ public class Request<T> implements Comparable<Request> {
 
     @NonNull
     public List<Pack> packs() {
-        return packs == null ? Collections.<Pack>emptyList() : Collections.unmodifiableList(packs);
+        return packs == null ? Collections.<Pack>emptyList() : Utils.immutableList(packs);
     }
 
     @Nullable
@@ -112,22 +113,22 @@ public class Request<T> implements Comparable<Request> {
 
     @NonNull
     public List<String> paramNames() {
-        return Collections.unmodifiableList(paramNames);
+        return Utils.immutableList(paramNames);
     }
 
     @NonNull
     public List<String> paramValues() {
-        return Collections.unmodifiableList(paramValues);
+        return Utils.immutableList(paramValues);
     }
 
     @NonNull
     public List<String> headerNames() {
-        return headerNames == null ? Collections.<String>emptyList() : Collections.unmodifiableList(headerNames);
+        return headerNames == null ? Collections.<String>emptyList() : Utils.immutableList(headerNames);
     }
 
     @NonNull
     public List<String> headerValues() {
-        return headerValues == null ? Collections.<String>emptyList() : Collections.unmodifiableList(headerValues);
+        return headerValues == null ? Collections.<String>emptyList() : Utils.immutableList(headerValues);
     }
 
     public String encodedParams() {
@@ -463,14 +464,14 @@ public class Request<T> implements Comparable<Request> {
          * @return 返回所有请求参数的名称，不可修改，顺序与 {@link Builder#values()} 一一对应。
          */
         public List<String> names() {
-            return Collections.unmodifiableList(paramNames);
+            return Utils.immutableList(paramNames);
         }
 
         /**
          * @return 返回所有请求参数的值，不可修改，顺序与 {@link Builder#names()} 一一对应。
          */
         public List<String> values() {
-            return Collections.unmodifiableList(paramValues);
+            return Utils.immutableList(paramValues);
         }
 
         /**
@@ -489,7 +490,7 @@ public class Request<T> implements Comparable<Request> {
          * @param mediaType 文件类型，如 image/png
          * @param file      文件全路径
          */
-        public Builder<T> addFile(String name, String mediaType, File file) {
+        public Builder<T> addPack(String name, String mediaType, File file) {
             if (packs == null) {
                 packs = new ArrayList<>();
             }
@@ -497,10 +498,14 @@ public class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        public List<Pack> packs() {
+            return packs == null ? Collections.<Pack>emptyList() : Utils.immutableList(packs);
+        }
+
         /**
          * 清除所有已添加并准备上传的文件——仅是不上传，并非从磁盘删除
          */
-        public Builder<T> clearFiles() {
+        public Builder<T> clearPacks() {
             if (packs != null) {
                 packs.clear();
             }
@@ -536,14 +541,14 @@ public class Request<T> implements Comparable<Request> {
          * @return 返回所有已添加的 Header 的名称，顺序与 {@link Builder#headerValues()} 一一对应
          */
         public List<String> headerNames() {
-            return headerNames != null ? Collections.unmodifiableList(headerNames) : Collections.<String>emptyList();
+            return headerNames == null ? Collections.<String>emptyList() : Utils.immutableList(headerNames);
         }
 
         /**
          * @return 返回所有已添加的 Header 的值，顺序与 {@link Builder#headerNames()} 一一对应
          */
         public List<String> headerValues() {
-            return headerValues != null ? Collections.unmodifiableList(headerValues) : Collections.<String>emptyList();
+            return headerValues == null ? Collections.<String>emptyList() : Utils.immutableList(headerValues);
         }
 
         /**
@@ -579,6 +584,7 @@ public class Request<T> implements Comparable<Request> {
             }
         }
 
+        @CallSuper
         public Request<T> build() {
             if (packs != null && !packs.isEmpty()) this.method = Method.POST;
             if (tag == null) tag = System.currentTimeMillis();

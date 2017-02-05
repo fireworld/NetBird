@@ -114,11 +114,10 @@ public class ApiService {
         }
     }
 
-    private static class LogReqProcessor implements Processor<Request> {
+    private static class LogReqProcessor implements Processor<Request<?>> {
         @NonNull
         @Override
-        @SuppressWarnings("unchecked")
-        public Request process(@NonNull Request req) {
+        public Request<?> process(@NonNull Request<?> req) {
             if (LogUtils.isDebug) {
                 Method m = req.method();
                 LogUtils.ii(TAG, "---------------------------------------- " + m.name() + " -----------------------------------------");
@@ -146,8 +145,7 @@ public class ApiService {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        private static void logPacks(Request req) {
+        private static void logPacks(Request<?> req) {
             List<Request.Pack> packs = req.packs();
             for (int i = 0, size = packs.size(); i < size; i++) {
                 Request.Pack pack = packs.get(i);
