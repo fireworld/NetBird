@@ -43,8 +43,8 @@ public final class NetBird {
 
 
     private NetBird(Builder builder) {
-        this.requestProcessors = Utils.immutableList(builder.requestProcessors);
-        this.responseProcessors = Utils.immutableList(builder.responseProcessors);
+        this.requestProcessors = Utils.safeImmutableList(builder.requestProcessors);
+        this.responseProcessors = Utils.safeImmutableList(builder.responseProcessors);
         this.executor = builder.executor;
         this.dispatcher = builder.dispatcher;
         this.baseUrl = builder.baseUrl;

@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import cc.colorcat.netbird.io.ProgressListener;
@@ -78,7 +77,7 @@ public class Request<T> implements Comparable<Request> {
 
     @NonNull
     public List<Pack> packs() {
-        return packs == null ? Collections.<Pack>emptyList() : Utils.immutableList(packs);
+        return Utils.safeImmutableList(packs);
     }
 
     @Nullable
@@ -113,22 +112,22 @@ public class Request<T> implements Comparable<Request> {
 
     @NonNull
     public List<String> paramNames() {
-        return Utils.immutableList(paramNames);
+        return Utils.safeImmutableList(paramNames);
     }
 
     @NonNull
     public List<String> paramValues() {
-        return Utils.immutableList(paramValues);
+        return Utils.safeImmutableList(paramValues);
     }
 
     @NonNull
     public List<String> headerNames() {
-        return headerNames == null ? Collections.<String>emptyList() : Utils.immutableList(headerNames);
+        return Utils.safeImmutableList(headerNames);
     }
 
     @NonNull
     public List<String> headerValues() {
-        return headerValues == null ? Collections.<String>emptyList() : Utils.immutableList(headerValues);
+        return Utils.safeImmutableList(headerValues);
     }
 
     public String encodedParams() {
@@ -464,14 +463,14 @@ public class Request<T> implements Comparable<Request> {
          * @return 返回所有请求参数的名称，不可修改，顺序与 {@link Builder#values()} 一一对应。
          */
         public List<String> names() {
-            return Utils.immutableList(paramNames);
+            return Utils.safeImmutableList(paramNames);
         }
 
         /**
          * @return 返回所有请求参数的值，不可修改，顺序与 {@link Builder#names()} 一一对应。
          */
         public List<String> values() {
-            return Utils.immutableList(paramValues);
+            return Utils.safeImmutableList(paramValues);
         }
 
         /**
@@ -499,7 +498,7 @@ public class Request<T> implements Comparable<Request> {
         }
 
         public List<Pack> packs() {
-            return packs == null ? Collections.<Pack>emptyList() : Utils.immutableList(packs);
+            return Utils.safeImmutableList(packs);
         }
 
         /**
@@ -541,14 +540,14 @@ public class Request<T> implements Comparable<Request> {
          * @return 返回所有已添加的 Header 的名称，顺序与 {@link Builder#headerValues()} 一一对应
          */
         public List<String> headerNames() {
-            return headerNames == null ? Collections.<String>emptyList() : Utils.immutableList(headerNames);
+            return Utils.safeImmutableList(headerNames);
         }
 
         /**
          * @return 返回所有已添加的 Header 的值，顺序与 {@link Builder#headerNames()} 一一对应
          */
         public List<String> headerValues() {
-            return headerValues == null ? Collections.<String>emptyList() : Utils.immutableList(headerValues);
+            return Utils.safeImmutableList(headerValues);
         }
 
         /**

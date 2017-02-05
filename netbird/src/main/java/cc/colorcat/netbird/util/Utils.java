@@ -252,6 +252,10 @@ public class Utils {
         return Collections.unmodifiableList(new ArrayList<>(list));
     }
 
+    public static <T> List<T> safeImmutableList(List<T> list) {
+        return list == null ? Collections.<T>emptyList() : Collections.unmodifiableList(new ArrayList<>(list));
+    }
+
 
     public static ThreadFactory threadFactory(final String name, final boolean daemon) {
         return new ThreadFactory() {
