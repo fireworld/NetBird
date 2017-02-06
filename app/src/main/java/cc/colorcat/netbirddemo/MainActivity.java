@@ -58,8 +58,7 @@ public class MainActivity extends Activity {
     }
 
     private void initData() {
-        TypeToken<Result<List<Course>>> token = new TypeToken<Result<List<Course>>>() {
-        };
+        TypeToken<Result<List<Course>>> token = new TypeToken<Result<List<Course>>>() {};
         final Request request = new Request.Builder<>(new GsonParser<>(token))
                 .url(HOST)
                 .path("/teacher")
