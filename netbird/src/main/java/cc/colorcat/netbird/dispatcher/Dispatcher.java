@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.sender;
+package cc.colorcat.netbird.dispatcher;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

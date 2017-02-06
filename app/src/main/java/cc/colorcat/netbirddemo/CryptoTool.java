@@ -53,7 +53,7 @@ public class CryptoTool {
             String res = resource;
             try {
                 // 判断是否需要URLDecode
-                if (res.contains("%2B") || res.contains("%3D")) {
+                if (res.contains("%2B") || res.contains("%3D") || res.contains("%2F")) {
                     res = URLDecoder.decode(res, "UTF-8");
                 }
                 byte[] base = Base64.decode(res.getBytes("UTF-8"), Base64.DEFAULT);

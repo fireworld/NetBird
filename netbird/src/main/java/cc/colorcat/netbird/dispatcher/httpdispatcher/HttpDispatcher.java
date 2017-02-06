@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.sender.httpsender;
+package cc.colorcat.netbird.dispatcher.httpdispatcher;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import cc.colorcat.netbird.Headers;
+import cc.colorcat.netbird.dispatcher.Dispatcher;
 import cc.colorcat.netbird.request.Method;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.request.RequestBody;
 import cc.colorcat.netbird.response.Response;
-import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.util.Const;
 import cc.colorcat.netbird.util.IoUtils;
 import cc.colorcat.netbird.util.LogUtils;
@@ -42,7 +42,7 @@ public final class HttpDispatcher implements Dispatcher {
         if (milliseconds <= 0) {
             throw new IllegalArgumentException("ConnectTimeOut must be greater than 0");
         }
-        this.connectTimeOut = milliseconds;
+        connectTimeOut = milliseconds;
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class HttpDispatcher implements Dispatcher {
         if (milliseconds <= 0) {
             throw new IllegalArgumentException("ReadTimeOut must be greater than 0");
         }
-        this.readTimeOut = milliseconds;
+        readTimeOut = milliseconds;
     }
 
     @Override
@@ -63,10 +63,10 @@ public final class HttpDispatcher implements Dispatcher {
             Class.forName("android.net.http.HttpResponseCache")
                     .getMethod("install", File.class, long.class)
                     .invoke(null, cachePath, cacheSize);
-            this.enableCache = true;
+            enableCache = true;
         } catch (Exception e) {
             LogUtils.e(e);
-            this.enableCache = false;
+            enableCache = false;
         }
     }
 
@@ -144,7 +144,7 @@ public final class HttpDispatcher implements Dispatcher {
         if (m == Method.POST) {
             conn.setDoOutput(true);
         }
-        conn.setUseCaches(this.enableCache);
+        conn.setUseCaches(enableCache);
         List<String> names = req.headerNames();
         if (!names.isEmpty()) {
             List<String> values = req.headerValues();

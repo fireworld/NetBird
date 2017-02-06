@@ -58,7 +58,7 @@ public class Request<T> implements Comparable<Request> {
     }
 
     public Object tag() {
-        return this.tag;
+        return tag;
     }
 
     @NonNull
@@ -376,7 +376,7 @@ public class Request<T> implements Comparable<Request> {
          * @param listener 下载进度监听器，服务器必须返回数据的长度才有效 {@link Response#contentLength()}
          */
         public Builder<T> loadListener(Response.LoadListener listener) {
-            this.loadListener = listener;
+            loadListener = listener;
             return this;
         }
 
@@ -384,7 +384,7 @@ public class Request<T> implements Comparable<Request> {
          * @param listener 上传进度监听器
          */
         public Builder<T> uploadListener(UploadListener listener) {
-            this.uploadListener = listener;
+            uploadListener = listener;
             return this;
         }
 
@@ -585,7 +585,7 @@ public class Request<T> implements Comparable<Request> {
 
         @CallSuper
         public Request<T> build() {
-            if (packs != null && !packs.isEmpty()) this.method = Method.POST;
+            if (packs != null && !packs.isEmpty()) method = Method.POST;
             if (tag == null) tag = System.currentTimeMillis();
             return new Request<>(this);
         }

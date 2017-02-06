@@ -15,12 +15,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import cc.colorcat.netbird.dispatcher.Dispatcher;
+import cc.colorcat.netbird.dispatcher.httpdispatcher.HttpDispatcher;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.NetworkData;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.response.ResponseBody;
-import cc.colorcat.netbird.sender.Dispatcher;
-import cc.colorcat.netbird.sender.httpsender.HttpDispatcher;
 import cc.colorcat.netbird.util.Const;
 import cc.colorcat.netbird.util.Utils;
 
@@ -245,7 +245,7 @@ public final class NetBird {
             if (milliseconds <= 0) {
                 throw new IllegalArgumentException("ReadTimeOut must be greater than 0");
             }
-            this.readTimeOut = milliseconds;
+            readTimeOut = milliseconds;
             return this;
         }
 
@@ -253,7 +253,7 @@ public final class NetBird {
             if (milliseconds <= 0) {
                 throw new IllegalArgumentException("ConnectTimeOut must be greater than 0");
             }
-            this.connectTimeOut = milliseconds;
+            connectTimeOut = milliseconds;
             return this;
         }
 

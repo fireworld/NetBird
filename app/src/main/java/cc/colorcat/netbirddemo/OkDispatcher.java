@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import cc.colorcat.netbird.Headers;
+import cc.colorcat.netbird.dispatcher.Dispatcher;
 import cc.colorcat.netbird.io.InputWrapper;
 import cc.colorcat.netbird.request.Method;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.response.ResponseBody;
 import cc.colorcat.netbird.response.SubResponseBody;
-import cc.colorcat.netbird.sender.Dispatcher;
 import cc.colorcat.netbird.util.Const;
 import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;

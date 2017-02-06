@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.sender.httpsender;
+package cc.colorcat.netbird.dispatcher.httpdispatcher;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
