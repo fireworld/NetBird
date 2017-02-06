@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.dispatcher.httpdispatcher;
+package cc.colorcat.netbird.dispatcher.http;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +16,6 @@ import cc.colorcat.netbird.util.Utils;
  * Created by cxx on 2016/12/15.
  * xx.ch@outlook.com
  */
-
 final class HttpResponseBody extends SubResponseBody {
 
     /**

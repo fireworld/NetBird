@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.dispatcher.httpdispatcher;
+package cc.colorcat.netbird.dispatcher.http;
 
 import java.io.BufferedReader;
 import java.io.File;

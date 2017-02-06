@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.dispatcher.httpdispatcher;
+package cc.colorcat.netbird.dispatcher.http;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -30,7 +30,6 @@ import cc.colorcat.netbird.util.Utils;
  * Created by cxx on 16-11-15.
  * xx.ch@outlook.com
  */
-
 public final class HttpDispatcher implements Dispatcher {
     private Map<Object, HttpURLConnection> running = new ConcurrentHashMap<>();
     private boolean enableCache = false;

@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import cc.colorcat.netbird.dispatcher.Dispatcher;
-import cc.colorcat.netbird.dispatcher.httpdispatcher.HttpDispatcher;
+import cc.colorcat.netbird.dispatcher.http.HttpDispatcher;
 import cc.colorcat.netbird.request.Request;
 import cc.colorcat.netbird.response.NetworkData;
 import cc.colorcat.netbird.response.Response;

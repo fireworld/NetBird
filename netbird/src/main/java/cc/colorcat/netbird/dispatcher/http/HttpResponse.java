@@ -1,4 +1,4 @@
-package cc.colorcat.netbird.dispatcher.httpdispatcher;
+package cc.colorcat.netbird.dispatcher.http;
 
 import android.support.annotation.NonNull;
 
@@ -13,7 +13,6 @@ import cc.colorcat.netbird.response.ResponseBody;
  * Created by cxx on 16-12-13.
  * xx.ch@outlook.com
  */
-
 final class HttpResponse extends Response {
 
     static HttpResponse create(@NonNull Headers headers, InputStream is, int code, @NonNull String msg, LoadListener listener) {
