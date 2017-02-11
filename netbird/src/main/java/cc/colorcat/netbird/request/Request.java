@@ -531,6 +531,10 @@ public class Request<T> implements Comparable<Request> {
             return Utils.safeImmutableList(paramValues);
         }
 
+        /**
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则只返回第一个。
+         */
+        @Nullable
         public String value(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             int index = paramNames.indexOf(name);
@@ -540,6 +544,10 @@ public class Request<T> implements Comparable<Request> {
             return null;
         }
 
+        /**
+         * @return 返回所有添加的与 name 对应的 value
+         */
+        @NonNull
         public List<String> values(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             List<String> values = new ArrayList<>(2);
