@@ -201,6 +201,9 @@ public final class NetBird {
             return this;
         }
 
+        /**
+         * 启用缓存，默认最小缓存为 5 * 1024 * 1024
+         */
         public Builder enableCache(@NonNull Context ctx, long cacheSize) {
             this.ctx = Utils.nonNull(ctx, "ctx == null");
             this.cacheSize = cacheSize < CACHE_MIN_SIZE ? CACHE_MIN_SIZE : cacheSize;
@@ -214,8 +217,8 @@ public final class NetBird {
          * Note: 调用会依添加的顺序进行，请谨慎修改 {@link Request} 中涉及泛型的数据，否则可能导致数据解析或回调错误，如：
          * {@link cc.colorcat.netbird.parser.Parser}, {@link Response.Callback}
          */
-        public Builder addRequestProcessor(@NonNull Processor<Request<?>> reqProcessor) {
-            requestProcessors.add(Utils.nonNull(reqProcessor, "reqProcessor == null"));
+        public Builder addRequestProcessor(@NonNull Processor<Request<?>> processor) {
+            requestProcessors.add(Utils.nonNull(processor, "processor == null"));
             return this;
         }
 
@@ -225,8 +228,8 @@ public final class NetBird {
          * <p>
          * Note: 调用会依添加的顺序进行，请谨慎调用 {@link Response#body()}, {@link ResponseBody} 可能只能读取一次。
          */
-        public Builder addResponseProcessor(@NonNull Processor<Response> repProcessor) {
-            responseProcessors.add(Utils.nonNull(repProcessor, "repProcessor == null"));
+        public Builder addResponseProcessor(@NonNull Processor<Response> processor) {
+            responseProcessors.add(Utils.nonNull(processor, "processor == null"));
             return this;
         }
 

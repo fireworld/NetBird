@@ -395,8 +395,9 @@ public class Request<T> implements Comparable<Request> {
          * @param value 请求参数的值
          */
         public Builder<T> add(String name, String value) {
-            paramNames.add(Utils.nonEmpty(name, "name is empty"));
-            paramValues.add(Utils.nonEmpty(value, "paramValues is empty"));
+            Utils.nonEmpty(name, "name is null/empty");
+            Utils.nonEmpty(value, "value is null/empty");
+            realAdd(name, value);
             return this;
         }
 
@@ -407,8 +408,7 @@ public class Request<T> implements Comparable<Request> {
          * @param value 请求参数的值
          */
         public Builder<T> add(String name, int value) {
-            add(name, String.valueOf(value));
-            return this;
+            return add(name, String.valueOf(value));
         }
 
         /**
@@ -418,8 +418,7 @@ public class Request<T> implements Comparable<Request> {
          * @param value 请求参数的值
          */
         public Builder<T> add(String name, long value) {
-            add(name, String.valueOf(value));
-            return this;
+            return add(name, String.valueOf(value));
         }
 
         /**
@@ -429,8 +428,7 @@ public class Request<T> implements Comparable<Request> {
          * @param value 请求参数的值
          */
         public Builder<T> add(String name, float value) {
-            add(name, String.valueOf(value));
-            return this;
+            return add(name, String.valueOf(value));
         }
 
         /**
@@ -440,8 +438,56 @@ public class Request<T> implements Comparable<Request> {
          * @param value 请求参数的值
          */
         public Builder<T> add(String name, double value) {
-            add(name, String.valueOf(value));
+            return add(name, String.valueOf(value));
+        }
+
+        public Builder<T> set(String name, String value) {
+            Utils.nonEmpty(name, "name is null/empty");
+            Utils.nonEmpty(value, "value is null/empty");
+            realRemove(name);
+            realAdd(name, value);
             return this;
+        }
+
+        public Builder<T> set(String name, int value) {
+            return set(name, String.valueOf(value));
+        }
+
+        public Builder<T> set(String name, long value) {
+            return set(name, String.valueOf(value));
+        }
+
+        public Builder<T> set(String name, float value) {
+            return set(name, String.valueOf(value));
+        }
+
+        public Builder<T> set(String name, double value) {
+            return set(name, String.valueOf(value));
+        }
+
+        public Builder<T> addIfNot(String name, String value) {
+            Utils.nonEmpty(name, "name is null/empty");
+            Utils.nonEmpty(value, "value is null/empty");
+            if (!paramNames.contains(name)) {
+                realAdd(name, value);
+            }
+            return this;
+        }
+
+        public Builder<T> addIfNot(String name, int value) {
+            return addIfNot(name, String.valueOf(value));
+        }
+
+        public Builder<T> addIfNot(String name, long value) {
+            return addIfNot(name, String.valueOf(value));
+        }
+
+        public Builder<T> addIfNot(String name, float value) {
+            return addIfNot(name, String.valueOf(value));
+        }
+
+        public Builder<T> addIfNot(String name, double value) {
+            return addIfNot(name, String.valueOf(value));
         }
 
         /**
@@ -450,13 +496,25 @@ public class Request<T> implements Comparable<Request> {
          * @param name 需要清除的参数的名称
          */
         public Builder<T> remove(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            realRemove(name);
+            return this;
+        }
+
+        private boolean realAdd(String name, String value) {
+            return paramNames.add(name) && paramValues.add(value);
+        }
+
+        private boolean realRemove(String name) {
+            boolean result = false;
             for (int i = paramNames.size() - 1; i >= 0; i--) {
                 if (paramNames.get(i).equals(name)) {
                     paramNames.remove(i);
                     paramValues.remove(i);
+                    result = true;
                 }
             }
-            return this;
+            return result;
         }
 
         /**
@@ -471,6 +529,34 @@ public class Request<T> implements Comparable<Request> {
          */
         public List<String> values() {
             return Utils.safeImmutableList(paramValues);
+        }
+
+        /**
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则只返回第一个。
+         */
+        @Nullable
+        public String value(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            int index = paramNames.indexOf(name);
+            if (index != -1) {
+                return paramValues.get(index);
+            }
+            return null;
+        }
+
+        /**
+         * @return 返回所有添加的与 name 对应的 value
+         */
+        @NonNull
+        public List<String> values(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            List<String> values = new ArrayList<>(2);
+            for (int i = 0, size = paramNames.size(); i < size; i++) {
+                if (paramNames.get(i).equals(name)) {
+                    values.add(paramValues.get(i));
+                }
+            }
+            return values;
         }
 
         /**
