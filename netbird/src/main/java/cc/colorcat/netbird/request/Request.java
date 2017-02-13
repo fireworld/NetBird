@@ -606,7 +606,8 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
-         * @return 返回添加的与 name 对应的 value, 如果存在多个则返回先添加的。
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则返回先添加的，如果没有则返回 null
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
          */
         @Nullable
         public String value(String name) {
@@ -620,6 +621,7 @@ public class Request<T> implements Comparable<Request> {
 
         /**
          * @return 返回所有添加的与 name 对应的 value
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
          */
         @NonNull
         public List<String> values(String name) {
@@ -691,7 +693,7 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
-         * 设置一个请求 Header 参数，如果已添加了名称相同的 Header 则原来的会被清除。
+         * 设置一个请求 Header 参数，如果已添加了名称相同的 Header 则原来的都会被清除。
          *
          * @param name  Header 的名称
          * @param value Header 的值
@@ -700,8 +702,24 @@ public class Request<T> implements Comparable<Request> {
          */
         public Builder<T> setHeader(String name, String value) {
             Utils.checkHeader(name, value);
-            removeHeader(name);
+            realRemoveHeader(name);
             realAddHeader(name, value);
+            return this;
+        }
+
+        /**
+         * 如果不存在名称为 name 的 header 则添加，否则忽略之。
+         *
+         * @param name  Header 的名称
+         * @param value Header 的值
+         * @throws NullPointerException     如果 name/value 为 null, 将抛出此异常
+         * @throws IllegalArgumentException 如果 name/value 不符合 Header 规范要求将抛出此异常
+         */
+        public Builder<T> addHeaderIfNot(String name, String value) {
+            Utils.checkHeader(name, value);
+            if (!containsHeader(name)) {
+                realAddHeader(name, value);
+            }
             return this;
         }
 
@@ -720,6 +738,41 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则返回先添加的，如果没有则返回 null
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
+         */
+        @Nullable
+        public String headerValue(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        return headerValues.get(i);
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @return 返回所有添加的与 name 对应的 value
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
+         */
+        @NonNull
+        public List<String> headerValues(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            List<String> values = new ArrayList<>(2);
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        values.add(headerValues.get(i));
+                    }
+                }
+            }
+            return values;
+        }
+
+        /**
          * 清除所有已添加的 Header 参数
          */
         public Builder<T> clearHeaders() {
@@ -731,25 +784,37 @@ public class Request<T> implements Comparable<Request> {
         }
 
 
-        private void realAddHeader(String name, String value) {
+        private boolean realAddHeader(String name, String value) {
             if (headerNames == null) {
                 headerNames = new ArrayList<>(8);
                 headerValues = new ArrayList<>(8);
             }
-            headerNames.add(name);
-            headerValues.add(value);
+            return headerNames.add(name) && headerValues.add(value);
         }
 
-        private void removeHeader(String name) {
+        private boolean realRemoveHeader(String name) {
+            boolean result = false;
             if (headerNames != null) {
                 for (int i = headerNames.size() - 1; i >= 0; i--) {
-                    String n = headerNames.get(i);
-                    if (name.equalsIgnoreCase(n)) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
                         headerNames.remove(i);
                         headerValues.remove(i);
+                        result = true;
                     }
                 }
             }
+            return result;
+        }
+
+        private boolean containsHeader(String name) {
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @CallSuper
