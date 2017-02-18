@@ -237,7 +237,9 @@ public class Request<T> implements Comparable<Request> {
             if (file == null || !file.exists()) {
                 throw new IllegalArgumentException("file is not exists");
             }
-            return new Pack(Utils.nonEmpty(name, "name is empty"), Utils.nonEmpty(contentType, "contentType is empty"), file);
+            Utils.nonEmpty(name, "name is empty");
+            Utils.nonEmpty(contentType, "contentType is empty");
+            return new Pack(name, contentType, file);
         }
 
         private Pack(String name, String contentType, File file) {
@@ -393,6 +395,7 @@ public class Request<T> implements Comparable<Request> {
          *
          * @param name  请求参数的名称
          * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
          */
         public Builder<T> add(String name, String value) {
             Utils.nonEmpty(name, "name is null/empty");
@@ -406,6 +409,7 @@ public class Request<T> implements Comparable<Request> {
          *
          * @param name  请求参数的名称
          * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
          */
         public Builder<T> add(String name, int value) {
             return add(name, String.valueOf(value));
@@ -416,6 +420,7 @@ public class Request<T> implements Comparable<Request> {
          *
          * @param name  请求参数的名称
          * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
          */
         public Builder<T> add(String name, long value) {
             return add(name, String.valueOf(value));
@@ -436,11 +441,20 @@ public class Request<T> implements Comparable<Request> {
          *
          * @param name  请求参数的名称
          * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
          */
         public Builder<T> add(String name, double value) {
             return add(name, String.valueOf(value));
         }
 
+        /**
+         * 设置请求参数
+         * 此操作将清除已添加的所有名称为 name 的参数对，然后添加所提供的参数对。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> set(String name, String value) {
             Utils.nonEmpty(name, "name is null/empty");
             Utils.nonEmpty(value, "value is null/empty");
@@ -449,10 +463,26 @@ public class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * 设置请求参数
+         * 此操作将清除已添加的所有名称为 name 的参数对，然后添加所提供的参数对。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> set(String name, int value) {
             return set(name, String.valueOf(value));
         }
 
+        /**
+         * 设置请求参数
+         * 此操作将清除已添加的所有名称为 name 的参数对，然后添加所提供的参数对。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> set(String name, long value) {
             return set(name, String.valueOf(value));
         }
@@ -461,10 +491,25 @@ public class Request<T> implements Comparable<Request> {
             return set(name, String.valueOf(value));
         }
 
+        /**
+         * 设置请求参数
+         * 此操作将清除已添加的所有名称为 name 的参数对，然后添加所提供的参数对。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> set(String name, double value) {
             return set(name, String.valueOf(value));
         }
 
+        /**
+         * 如果不存在名称为 name 的参数对则添加所提供的参数对，否则忽略之。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> addIfNot(String name, String value) {
             Utils.nonEmpty(name, "name is null/empty");
             Utils.nonEmpty(value, "value is null/empty");
@@ -474,26 +519,55 @@ public class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * 如果不存在名称为 name 的参数对则添加所提供的参数对，否则忽略之。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> addIfNot(String name, int value) {
             return addIfNot(name, String.valueOf(value));
         }
 
+        /**
+         * 如果不存在名称为 name 的参数对则添加所提供的参数对，否则忽略之。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> addIfNot(String name, long value) {
             return addIfNot(name, String.valueOf(value));
         }
 
+        /**
+         * 如果不存在名称为 name 的参数对则添加所提供的参数对，否则忽略之。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> addIfNot(String name, float value) {
             return addIfNot(name, String.valueOf(value));
         }
 
+        /**
+         * 如果不存在名称为 name 的参数对则添加所提供的参数对，否则忽略之。
+         *
+         * @param name  请求参数的名称
+         * @param value 请求参数的值
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
+         */
         public Builder<T> addIfNot(String name, double value) {
             return addIfNot(name, String.valueOf(value));
         }
 
         /**
-         * 除清指定名称的参数
+         * 除清所有名称为 name 的参数对
          *
          * @param name 需要清除的参数的名称
+         * @throws IllegalArgumentException 如果 name/value 为 null 或空字符串将抛出此异常
          */
         public Builder<T> remove(String name) {
             Utils.nonEmpty(name, "name is null/empty");
@@ -532,7 +606,8 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
-         * @return 返回添加的与 name 对应的 value, 如果存在多个则只返回第一个。
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则返回先添加的，如果没有则返回 null
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
          */
         @Nullable
         public String value(String name) {
@@ -546,6 +621,7 @@ public class Request<T> implements Comparable<Request> {
 
         /**
          * @return 返回所有添加的与 name 对应的 value
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
          */
         @NonNull
         public List<String> values(String name) {
@@ -570,10 +646,12 @@ public class Request<T> implements Comparable<Request> {
 
         /**
          * 添加需要上传的文件
+         * name, mediaType, file 最终会被打包为 {@link Pack} 之后再添加
          *
          * @param name      参数名
          * @param mediaType 文件类型，如 image/png
          * @param file      文件全路径
+         * @throws IllegalArgumentException 如果 name/mediaType 为 null 或空字符串，或 file 为 null 或不存在，均将抛出此异常。
          */
         public Builder<T> addPack(String name, String mediaType, File file) {
             if (packs == null) {
@@ -583,6 +661,9 @@ public class Request<T> implements Comparable<Request> {
             return this;
         }
 
+        /**
+         * @return 返回所有已添加准备上传的文件
+         */
         public List<Pack> packs() {
             return Utils.safeImmutableList(packs);
         }
@@ -602,6 +683,8 @@ public class Request<T> implements Comparable<Request> {
          *
          * @param name  Header 的名称
          * @param value Header 的值
+         * @throws NullPointerException     如果 name/value 为 null, 将抛出此异常
+         * @throws IllegalArgumentException 如果 name/value 不符合 Header 规范要求将抛出此异常
          */
         public Builder<T> addHeader(String name, String value) {
             Utils.checkHeader(name, value);
@@ -610,15 +693,33 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
-         * 设置一个请求 Header 参数，如果已添加了名称相同的 Header 则原来的会被清除。
+         * 设置一个请求 Header 参数，如果已添加了名称相同的 Header 则原来的都会被清除。
          *
          * @param name  Header 的名称
          * @param value Header 的值
+         * @throws NullPointerException     如果 name/value 为 null, 将抛出此异常
+         * @throws IllegalArgumentException 如果 name/value 不符合 Header 规范要求将抛出此异常
          */
         public Builder<T> setHeader(String name, String value) {
             Utils.checkHeader(name, value);
-            removeHeader(name);
+            realRemoveHeader(name);
             realAddHeader(name, value);
+            return this;
+        }
+
+        /**
+         * 如果不存在名称为 name 的 header 则添加，否则忽略之。
+         *
+         * @param name  Header 的名称
+         * @param value Header 的值
+         * @throws NullPointerException     如果 name/value 为 null, 将抛出此异常
+         * @throws IllegalArgumentException 如果 name/value 不符合 Header 规范要求将抛出此异常
+         */
+        public Builder<T> addHeaderIfNot(String name, String value) {
+            Utils.checkHeader(name, value);
+            if (!containsHeader(name)) {
+                realAddHeader(name, value);
+            }
             return this;
         }
 
@@ -637,6 +738,41 @@ public class Request<T> implements Comparable<Request> {
         }
 
         /**
+         * @return 返回添加的与 name 对应的 value, 如果存在多个则返回先添加的，如果没有则返回 null
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
+         */
+        @Nullable
+        public String headerValue(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        return headerValues.get(i);
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @return 返回所有添加的与 name 对应的 value
+         * @throws IllegalArgumentException 如果 name 为 null或空字符串将抛出此异常
+         */
+        @NonNull
+        public List<String> headerValues(String name) {
+            Utils.nonEmpty(name, "name is null/empty");
+            List<String> values = new ArrayList<>(2);
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        values.add(headerValues.get(i));
+                    }
+                }
+            }
+            return values;
+        }
+
+        /**
          * 清除所有已添加的 Header 参数
          */
         public Builder<T> clearHeaders() {
@@ -648,25 +784,37 @@ public class Request<T> implements Comparable<Request> {
         }
 
 
-        private void realAddHeader(String name, String value) {
+        private boolean realAddHeader(String name, String value) {
             if (headerNames == null) {
                 headerNames = new ArrayList<>(8);
                 headerValues = new ArrayList<>(8);
             }
-            headerNames.add(name);
-            headerValues.add(value);
+            return headerNames.add(name) && headerValues.add(value);
         }
 
-        private void removeHeader(String name) {
+        private boolean realRemoveHeader(String name) {
+            boolean result = false;
             if (headerNames != null) {
                 for (int i = headerNames.size() - 1; i >= 0; i--) {
-                    String n = headerNames.get(i);
-                    if (name.equalsIgnoreCase(n)) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
                         headerNames.remove(i);
                         headerValues.remove(i);
+                        result = true;
                     }
                 }
             }
+            return result;
+        }
+
+        private boolean containsHeader(String name) {
+            if (headerNames != null) {
+                for (int i = 0, size = headerNames.size(); i < size; i++) {
+                    if (name.equalsIgnoreCase(headerNames.get(i))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @CallSuper
