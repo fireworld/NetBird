@@ -24,10 +24,6 @@ import cc.colorcat.netbird.util.Utils;
 public class Request<T> implements Comparable<Request> {
     private Parameters params;
     private Headers headers;
-    //    private List<String> paramNames;
-//    private List<String> paramValues;
-//    private List<String> headerNames;
-//    private List<String> headerValues;
     private String url;
     private String path;
     private Method method;
@@ -43,10 +39,6 @@ public class Request<T> implements Comparable<Request> {
     protected Request(Builder<T> builder) {
         this.params = builder.params;
         this.headers = builder.headers;
-//        this.paramNames = builder.paramNames;
-//        this.paramValues = builder.paramValues;
-//        this.headerNames = builder.headerNames;
-//        this.headerValues = builder.headerValues;
         this.url = builder.url;
         this.path = builder.path;
         this.method = builder.method;
@@ -118,25 +110,21 @@ public class Request<T> implements Comparable<Request> {
     @NonNull
     public List<String> paramNames() {
         return params.names();
-//        return Utils.safeImmutableList(paramNames);
     }
 
     @NonNull
     public List<String> paramValues() {
         return params.values();
-//        return Utils.safeImmutableList(paramValues);
     }
 
     @NonNull
     public List<String> headerNames() {
         return Utils.nullElse(headers, Headers.emptyHeaders()).names();
-//        return Utils.safeImmutableList(headerNames);
     }
 
     @NonNull
     public List<String> headerValues() {
         return Utils.nullElse(headers, Headers.emptyHeaders()).values();
-//        return Utils.safeImmutableList(headerValues);
     }
 
     public String encodedParams() {
@@ -218,38 +206,6 @@ public class Request<T> implements Comparable<Request> {
         return result;
     }
 
-    //    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//
-//        Request<?> request = (Request<?>) o;
-//
-//        if (url != null ? !url.equals(request.url) : request.url != null) return false;
-//        if (path != null ? !path.equals(request.path) : request.path != null) return false;
-//        if (method != request.method) return false;
-//        if (!paramNames.equals(request.paramNames)) return false;
-//        if (!paramValues.equals(request.paramValues)) return false;
-//        if (headerNames != null ? !headerNames.equals(request.headerNames) : request.headerNames != null)
-//            return false;
-//        if (headerValues != null ? !headerValues.equals(request.headerValues) : request.headerValues != null)
-//            return false;
-//        return packs != null ? packs.equals(request.packs) : request.packs == null;
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        int result = url != null ? url.hashCode() : 0;
-//        result = 31 * result + (path != null ? path.hashCode() : 0);
-//        result = 31 * result + method.hashCode();
-//        result = 31 * result + paramNames.hashCode();
-//        result = 31 * result + paramValues.hashCode();
-//        result = 31 * result + (headerNames != null ? headerNames.hashCode() : 0);
-//        result = 31 * result + (headerValues != null ? headerValues.hashCode() : 0);
-//        result = 31 * result + (packs != null ? packs.hashCode() : 0);
-//        return result;
-//    }
-
     @Override
     public int compareTo(@NonNull Request o) {
         if (this.equals(o)) {
@@ -323,10 +279,6 @@ public class Request<T> implements Comparable<Request> {
     public static class Builder<T> {
         private Parameters params;
         private Headers headers;
-        //        private List<String> paramNames = new ArrayList<>();
-//        private List<String> paramValues = new ArrayList<>();
-//        private List<String> headerNames;
-//        private List<String> headerValues;
         private String url;
         private String path;
         private Method method = Method.GET;
@@ -342,10 +294,6 @@ public class Request<T> implements Comparable<Request> {
         protected Builder(Request<T> req) {
             this.params = req.params;
             this.headers = req.headers;
-//            this.paramNames = req.paramNames;
-//            this.paramValues = req.paramValues;
-//            this.headerNames = req.headerNames;
-//            this.headerValues = req.headerValues;
             this.url = req.url;
             this.path = req.path;
             this.method = req.method;
@@ -501,8 +449,6 @@ public class Request<T> implements Comparable<Request> {
             Utils.nonEmpty(name, "name is null/empty");
             Utils.nonEmpty(value, "value is null/empty");
             params.set(name, value);
-//            realRemove(name);
-//            realAdd(name, value);
             return this;
         }
 
@@ -557,9 +503,6 @@ public class Request<T> implements Comparable<Request> {
             Utils.nonEmpty(name, "name is null/empty");
             Utils.nonEmpty(value, "value is null/empty");
             params.addIfNot(name, value);
-//            if (!paramNames.contains(name)) {
-//                realAdd(name, value);
-//            }
             return this;
         }
 
@@ -616,32 +559,14 @@ public class Request<T> implements Comparable<Request> {
         public Builder<T> remove(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             params.removeAll(name);
-//            realRemove(name);
             return this;
         }
-
-//        private boolean realAdd(String name, String value) {
-//            return paramNames.add(name) && paramValues.add(value);
-//        }
-//
-//        private boolean realRemove(String name) {
-//            boolean result = false;
-//            for (int i = paramNames.size() - 1; i >= 0; i--) {
-//                if (paramNames.get(i).equals(name)) {
-//                    paramNames.remove(i);
-//                    paramValues.remove(i);
-//                    result = true;
-//                }
-//            }
-//            return result;
-//        }
 
         /**
          * @return 返回所有请求参数的名称，不可修改，顺序与 {@link Builder#values()} 一一对应。
          */
         public List<String> names() {
             return params.names();
-//            return Utils.safeImmutableList(paramNames);
         }
 
         /**
@@ -649,7 +574,6 @@ public class Request<T> implements Comparable<Request> {
          */
         public List<String> values() {
             return params.values();
-//            return Utils.safeImmutableList(paramValues);
         }
 
         /**
@@ -660,11 +584,6 @@ public class Request<T> implements Comparable<Request> {
         public String value(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             return params.value(name);
-//            int index = paramNames.indexOf(name);
-//            if (index != -1) {
-//                return paramValues.get(index);
-//            }
-//            return null;
         }
 
         /**
@@ -675,13 +594,6 @@ public class Request<T> implements Comparable<Request> {
         public List<String> values(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             return params.values(name);
-//            List<String> values = new ArrayList<>(2);
-//            for (int i = 0, size = paramNames.size(); i < size; i++) {
-//                if (paramNames.get(i).equals(name)) {
-//                    values.add(paramValues.get(i));
-//                }
-//            }
-//            return values;
         }
 
         /**
@@ -689,8 +601,6 @@ public class Request<T> implements Comparable<Request> {
          */
         public Builder<T> clear() {
             params.clear();
-//            paramNames.clear();
-//            paramValues.clear();
             return this;
         }
 
@@ -742,7 +652,6 @@ public class Request<T> implements Comparable<Request> {
                 headers = createHeader();
             }
             headers.add(name, value);
-//            realAddHeader(name, value);
             return this;
         }
 
@@ -760,8 +669,6 @@ public class Request<T> implements Comparable<Request> {
                 headers = createHeader();
             }
             headers.set(name, value);
-//            realRemoveHeader(name);
-//            realAddHeader(name, value);
             return this;
         }
 
@@ -779,9 +686,6 @@ public class Request<T> implements Comparable<Request> {
                 headers = createHeader();
             }
             headers.addIfNot(name, value);
-//            if (!containsHeader(name)) {
-//                realAddHeader(name, value);
-//            }
             return this;
         }
 
@@ -790,7 +694,6 @@ public class Request<T> implements Comparable<Request> {
          */
         public List<String> headerNames() {
             return Utils.nullElse(headers, Headers.emptyHeaders()).names();
-//            return Utils.safeImmutableList(headerNames);
         }
 
         /**
@@ -798,7 +701,6 @@ public class Request<T> implements Comparable<Request> {
          */
         public List<String> headerValues() {
             return Utils.nullElse(headers, Headers.emptyHeaders()).values();
-//            return Utils.safeImmutableList(headerValues);
         }
 
         /**
@@ -809,14 +711,6 @@ public class Request<T> implements Comparable<Request> {
         public String headerValue(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             return Utils.nullElse(headers, Headers.emptyHeaders()).value(name);
-//            if (headerNames != null) {
-//                for (int i = 0, size = headerNames.size(); i < size; i++) {
-//                    if (name.equalsIgnoreCase(headerNames.get(i))) {
-//                        return headerValues.get(i);
-//                    }
-//                }
-//            }
-//            return null;
         }
 
         /**
@@ -827,15 +721,6 @@ public class Request<T> implements Comparable<Request> {
         public List<String> headerValues(String name) {
             Utils.nonEmpty(name, "name is null/empty");
             return Utils.nullElse(headers, Headers.emptyHeaders()).values(name);
-//            List<String> values = new ArrayList<>(2);
-//            if (headerNames != null) {
-//                for (int i = 0, size = headerNames.size(); i < size; i++) {
-//                    if (name.equalsIgnoreCase(headerNames.get(i))) {
-//                        values.add(headerValues.get(i));
-//                    }
-//                }
-//            }
-//            return values;
         }
 
         /**
@@ -845,50 +730,12 @@ public class Request<T> implements Comparable<Request> {
             if (headers != null) {
                 headers.clear();
             }
-//            if (headerNames != null) {
-//                headerNames.clear();
-//                headerValues.clear();
-//            }
             return this;
         }
 
         private static Headers createHeader() {
             return Headers.create(4);
         }
-
-
-//        private boolean realAddHeader(String name, String value) {
-//            if (headerNames == null) {
-//                headerNames = new ArrayList<>(8);
-//                headerValues = new ArrayList<>(8);
-//            }
-//            return headerNames.add(name) && headerValues.add(value);
-//        }
-//
-//        private boolean realRemoveHeader(String name) {
-//            boolean result = false;
-//            if (headerNames != null) {
-//                for (int i = headerNames.size() - 1; i >= 0; i--) {
-//                    if (name.equalsIgnoreCase(headerNames.get(i))) {
-//                        headerNames.remove(i);
-//                        headerValues.remove(i);
-//                        result = true;
-//                    }
-//                }
-//            }
-//            return result;
-//        }
-//
-//        private boolean containsHeader(String name) {
-//            if (headerNames != null) {
-//                for (int i = 0, size = headerNames.size(); i < size; i++) {
-//                    if (name.equalsIgnoreCase(headerNames.get(i))) {
-//                        return true;
-//                    }
-//                }
-//            }
-//            return false;
-//        }
 
         @CallSuper
         public Request<T> build() {

@@ -5,35 +5,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import cc.colorcat.netbird.io.ByteOutputStream;
-import cc.colorcat.netbird.util.Pair;
 
 final class FormBody extends RequestBody {
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
 //    private static final String CONTENT_TYPE = "text/plain; charset=UTF-8";
 
-//    private final List<String> names;
-//    private final List<String> values;
-    private final Pair namesAndValues;
+    private final Parameters namesAndValues;
 
-//    public static FormBody create(List<String> names, List<String> values) {
-//        return new FormBody(names, values);
-//    }
-
-    public static FormBody create(Pair namesAndValues) {
+    public static FormBody create(Parameters namesAndValues) {
         return new FormBody(namesAndValues);
     }
 
-    private FormBody(Pair namesAndValues) {
+    private FormBody(Parameters namesAndValues) {
         this.namesAndValues = namesAndValues;
-//        this.names = null;
-//        this.values = null;
     }
-
-//    private FormBody(List<String> names, List<String> values) {
-//        namesAndValues = null;
-//        this.names = names;
-//        this.values = values;
-//    }
 
     public int size() {
         return namesAndValues.size();
