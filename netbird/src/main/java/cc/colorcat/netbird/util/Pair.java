@@ -271,13 +271,4 @@ public class Pair {
     protected boolean compareName(String name, String anotherName) {
         return name == anotherName || name != null && name.equals(anotherName);
     }
-
-//    private boolean compareName(String name, String anotherName) {
-//        if (name == anotherName) return true;
-//        if (ignoreCase) {
-//            return name != null && name.equalsIgnoreCase(anotherName);
-//        } else {
-//            return name != null && name.equals(anotherName);
-//        }
-//    }
 }
