@@ -19,7 +19,7 @@ import java.util.TreeSet;
  * Note1: 本类允许数据对的 name 和 value 为 {@code null}
  * Note2: 本类非线程安全
  * <p>
- * 构造方法 {@link Pair#compareName(String, String)} 将决定 name 的匹配方式
+ * 方法 {@link Pair#compareName(String, String)} 将决定 name 的匹配方式
  * 你可以覆写 {@link Pair#compareName(String, String)} 来影响 name 的匹配方式，如大小写敏感等
  * <p>
  * Created by cxx on 2017/2/20.
