@@ -34,7 +34,7 @@ public final class Headers extends Pair {
     /**
      * @param names  数据对 name 列表，顺序应与 values 一一对应
      * @param values 数所对 value 列表，顺序应与 names 一一对应
-     * @return {@link Pair}
+     * @return {@link Headers}
      * @throws NullPointerException     如果 names / values 为空将抛出此异常
      * @throws IllegalArgumentException 如果 names.size() != values.size() 将抛出此异常
      */
