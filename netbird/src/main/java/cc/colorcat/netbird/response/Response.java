@@ -39,7 +39,7 @@ public class Response {
     protected Response(int code, @NonNull String msg, Headers headers, ResponseBody body) {
         this.code = code;
         this.msg = msg;
-        this.headers = Utils.nullElse(headers, Headers.EMPTY);
+        this.headers = Utils.nullElse(headers, Headers.emptyHeaders());
         this.body = body;
     }
 

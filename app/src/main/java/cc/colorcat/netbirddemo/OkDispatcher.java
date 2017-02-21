@@ -88,7 +88,7 @@ public class OkDispatcher implements Dispatcher {
             msg = Utils.nullElse(rep.message(), msg);
             okhttp3.ResponseBody okBody = rep.body();
             InputStream data = okBody.byteStream();
-            Headers headers = Headers.EMPTY;
+            Headers headers = Headers.emptyHeaders();
             okhttp3.Headers okHeaders = rep.headers();
             if (okHeaders != null) {
                 headers = Headers.create(okHeaders.toMultimap());

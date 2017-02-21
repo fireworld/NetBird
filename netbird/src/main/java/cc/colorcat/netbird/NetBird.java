@@ -22,6 +22,7 @@ import cc.colorcat.netbird.response.NetworkData;
 import cc.colorcat.netbird.response.Response;
 import cc.colorcat.netbird.response.ResponseBody;
 import cc.colorcat.netbird.util.Const;
+import cc.colorcat.netbird.util.LogUtils;
 import cc.colorcat.netbird.util.Utils;
 
 
@@ -96,8 +97,12 @@ public final class NetBird {
     }
 
     private void finish(Request<?> req) {
+        LogUtils.i("NetBird", "Before: Running Requests = " + runningReqs.size());
+        LogUtils.i("NetBird", "Before: Waiting Requests = " + waitingQueue.size());
         dispatcher.finish(req);
         runningReqs.remove(req);
+        LogUtils.d("NetBird", "After: Running Requests = " + runningReqs.size());
+        LogUtils.d("NetBird", "After: Waiting Requests = " + waitingQueue.size());
         notifyNewRequest();
     }
 

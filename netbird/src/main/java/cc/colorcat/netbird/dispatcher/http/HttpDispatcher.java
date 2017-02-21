@@ -92,7 +92,7 @@ public final class HttpDispatcher implements Dispatcher {
             LogUtils.e(e);
             msg = Utils.emptyElse(e.getMessage(), Utils.formatMsg(msg, e));
         }
-        Headers headers = Headers.EMPTY;
+        Headers headers = Headers.emptyHeaders();
         if (map != null) {
             headers = Headers.create(map);
         }
@@ -107,6 +107,7 @@ public final class HttpDispatcher implements Dispatcher {
             conn.disconnect();
             running.remove(tag);
         }
+        LogUtils.e("NetBird", "Dispatcher Running size = " + running.size());
     }
 
     @Override

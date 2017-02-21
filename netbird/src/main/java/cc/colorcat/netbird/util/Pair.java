@@ -19,92 +19,28 @@ import java.util.TreeSet;
  * Note1: 本类允许数据对的 name 和 value 为 {@code null}
  * Note2: 本类非线程安全
  * <p>
- * 构造方法 {@link Pair#Pair(int, boolean)} 中的 ignoreCase 将决定 name 的匹配方式
- * 如果 ignoreCase 为 true，则涉及 name 匹配时将忽略大小写，否则不会忽略大小写
+ * 构造方法 {@link Pair#compareName(String, String)} 将决定 name 的匹配方式
+ * 你可以覆写 {@link Pair#compareName(String, String)} 来影响 name 的匹配方式，如大小写敏感等
  * <p>
  * Created by cxx on 2017/2/20.
  * xx.ch@outlook.com
  */
-public final class Pair {
-    private static Pair emptyPair;
-
-    private boolean ignoreCase = false;
+public class Pair {
     private List<String> names;
     private List<String> values;
 
     /**
-     * 返回一个空的 {@link Pair}，不可修改
-     */
-    public static Pair emptyPair() {
-        if (emptyPair == null) {
-            emptyPair = new Pair(Collections.<String>emptyList(), Collections.<String>emptyList(), false);
-        }
-        return emptyPair;
-    }
-
-    /**
-     * @throws NullPointerException 如果 namesAndValues 为空将抛出此异常
-     */
-    public static Pair create(Map<String, List<String>> namesAndValues, boolean ignoreCase) {
-        if (namesAndValues == null) {
-            throw new NullPointerException("namesAndValues is null");
-        }
-        int size = namesAndValues.size();
-        List<String> names = new ArrayList<>(size);
-        List<String> values = new ArrayList<>(size);
-        for (Map.Entry<String, List<String>> entry : namesAndValues.entrySet()) {
-            String k = entry.getKey();
-            List<String> vs = entry.getValue();
-            for (int i = 0, s = vs.size(); i < s; i++) {
-                names.add(k);
-                values.add(vs.get(i));
-            }
-        }
-        return new Pair(names, values, ignoreCase);
-    }
-
-    /**
-     * @param names      数据对 name 列表，顺序应与 values 一一对应
-     * @param values     数所对 value 列表，顺序应与 names 一一对应
-     * @param ignoreCase 是否忽略大小写
-     * @return {@link Pair}
-     * @throws NullPointerException     如果 names / values 为空将抛出此异常
-     * @throws IllegalArgumentException 如果 names.size() != values.size() 将抛出此异常
-     */
-    public static Pair create(List<String> names, List<String> values, boolean ignoreCase) {
-        if (names == null || values == null) {
-            throw new NullPointerException("names or values is null");
-        }
-        if (names.size() != values.size()) {
-            throw new IllegalArgumentException("names.size() != values.size()");
-        }
-        return new Pair(names, values, ignoreCase);
-    }
-
-    /**
-     * @param capacity   初始化容量
-     * @param ignoreCase 是否忽略大小写
-     * @return {@link Pair}
-     */
-    public static Pair create(int capacity, boolean ignoreCase) {
-        return new Pair(capacity, ignoreCase);
-    }
-
-    /**
-     * @param capacity   初始化容量大小
-     * @param ignoreCase 对 name 是否区分大小写
+     * @param capacity 初始化容量大小
      * @throws IllegalArgumentException 如果 capacity 为负将抛出此异常
      */
-    private Pair(int capacity, boolean ignoreCase) {
+    protected Pair(int capacity) {
         this.names = new ArrayList<>(capacity);
         this.values = new ArrayList<>(capacity);
-        this.ignoreCase = ignoreCase;
     }
 
-    private Pair(List<String> names, List<String> values, boolean ignoreCase) {
+    protected Pair(List<String> names, List<String> values) {
         this.names = names;
         this.values = values;
-        this.ignoreCase = ignoreCase;
     }
 
     /**
@@ -116,7 +52,7 @@ public final class Pair {
 
     /**
      * 设置一个数据对，如果此前已添加，将移除之前添加的所有与 name 匹配的数据对
-     * Note: 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * Note: name 匹配方式取决于 {@link Pair#compareName(String, String)}
      */
     public void set(String name, String value) {
         realRemoveAll(name);
@@ -125,7 +61,7 @@ public final class Pair {
 
     /**
      * 如果此前没有添加过与 name 匹配的数据对就添加，否则忽略
-     * Note: 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * Note: name 匹配方式取决于 {@link Pair#compareName(String, String)}
      */
     public void addIfNot(String name, String value) {
         if (!contains(name)) {
@@ -135,7 +71,7 @@ public final class Pair {
 
     /**
      * 移除所有与 name 匹配的数据对
-     * Note: 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * Note: name 匹配方式取决于 {@link Pair#compareName(String, String)}
      */
     public void removeAll(String name) {
         realRemoveAll(name);
@@ -174,7 +110,7 @@ public final class Pair {
     /**
      * 根据 name 查找数据对，并返回数据对的 value, 如果存在多个则返回最先添加的
      *
-     * @param name 待查找的数据对的 name, 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * @param name 待查找的数据对的 name, name 匹配方式取决于 {@link Pair#compareName(String, String)}
      * @return 返回查找到的数据对的 value, 如果不存在就返回 {@code null}
      */
     @Nullable
@@ -190,7 +126,7 @@ public final class Pair {
     /**
      * 根据 name 查找数据对，并返回数据对的 value, 如果存在多个则返回最先添加的
      *
-     * @param name 待查找的数据对的 name, 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * @param name 待查找的数据对的 name, name 匹配方式取决于 {@link Pair#compareName(String, String)}
      * @return 返回查找到的数据对的 value, 如果不存在就返回 defValue
      */
     public String value(String name, String defValue) {
@@ -200,7 +136,7 @@ public final class Pair {
     /**
      * 根据 name 查找数据对，并返回所有匹配的数据对的 value
      *
-     * @param name 待查找的数据对的 name, 匹配时是否忽略大小写取决于构造方法中的 ignoreCase
+     * @param name 待查找的数据对的 name, name 匹配方式取决于 {@link Pair#compareName(String, String)}
      * @return 返回不可修改的 {@link List}，如果不存在则返回空 {@link List}
      */
     public List<String> values(String name) {
@@ -230,7 +166,7 @@ public final class Pair {
 
     /**
      * @return 所有已添加的数据对的 name 集合，不可修改
-     * Note: 如果 ignoreCase 为 true，则仅是大小写不同的 name 将视作同一个
+     * Note: name 匹配方式取决于 {@link Pair#compareName(String, String)}
      */
     public Set<String> nameSet() {
         Set<String> result;
@@ -239,7 +175,7 @@ public final class Pair {
         if (nullIndex >= 0) {
             ns.removeAll(Arrays.asList(new String[]{null}));
         }
-        if (ignoreCase) {
+        if (compareName("A", "a")) {
             result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             result.addAll(ns);
         } else {
@@ -254,7 +190,7 @@ public final class Pair {
 
     /**
      * @return name 为结果的键, value 的列表为结果的值
-     * Note: 如果 ignoreCase 为 true，则仅是大小写不同的 name 将视作同一个
+     * Note: name 匹配方式取决于 {@link Pair#compareName(String, String)}
      */
     public Map<String, List<String>> toMap() {
         Map<String, List<String>> result = new HashMap<>();
@@ -269,6 +205,10 @@ public final class Pair {
      */
     public int size() {
         return names.size();
+    }
+
+    public boolean isEmpty() {
+        return names.isEmpty();
     }
 
     /**
@@ -328,12 +268,16 @@ public final class Pair {
         return false;
     }
 
-    private boolean compareName(String name, String anotherName) {
-        if (name == anotherName) return true;
-        if (ignoreCase) {
-            return name != null && name.equalsIgnoreCase(anotherName);
-        } else {
-            return name != null && name.equals(anotherName);
-        }
+    protected boolean compareName(String name, String anotherName) {
+        return name == anotherName || name != null && name.equals(anotherName);
     }
+
+//    private boolean compareName(String name, String anotherName) {
+//        if (name == anotherName) return true;
+//        if (ignoreCase) {
+//            return name != null && name.equalsIgnoreCase(anotherName);
+//        } else {
+//            return name != null && name.equals(anotherName);
+//        }
+//    }
 }
